@@ -24,12 +24,23 @@ export default function AppProvider ({ children }: PropsWithChildren) {
           root: {
             ...actionItemOverride,
             padding: '8px 16px'
+          },
+          sizeSmall: {
+            padding: '6px 8px'
           }
         }
       },
       MuiIconButton: {
         styleOverrides: {
           root: actionItemOverride
+        }
+      },
+      MuiButtonGroup: {
+        styleOverrides: {
+          root: {
+            ...actionItemOverride,
+            lightingColor: 'red'
+          },
         }
       },
       MuiTouchRipple: {

@@ -1,0 +1,26 @@
+.data-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+
+  .MuiButtonGroup-root:last-child {
+    margin-left: auto;
+  }
+
+  .row-information {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-bottom: 3px;
+  }
+  
+  .row-stats { display: flex; gap: 8px; }
+  .row-stat {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 15px;
+    opacity: var(--opacity-text-secondary);
+  }
+  .row-stat .MuiSvgIcon-root { font-size: inherit; }
+}
