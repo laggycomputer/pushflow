@@ -11,7 +11,6 @@ jsonwebtoken = "9"
 serde = {version = "1.0", features = ["derive"] }
 reqwest = "0.12.22"
 uuid = { version = "1.17.0", features = ["v4"] }
-cookie = "0.18.1"
 dotenv = "0.15.0"
 
 [profile.release]
