@@ -1,14 +1,14 @@
-use std::ops::Add;
-use std::time::Duration;
 use crate::AppData;
+use actix_web::cookie::time::UtcDateTime;
 use actix_web::cookie::{Cookie, SameSite};
 use actix_web::http::StatusCode;
 use actix_web::web::Query;
-use actix_web::{HttpRequest, HttpResponse, Responder, cookie, get};
-use actix_web::cookie::time::UtcDateTime;
+use actix_web::{cookie, get, HttpRequest, HttpResponse, Responder};
 use anyhow::Context;
 use jsonwebtoken::{DecodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
+use std::ops::Add;
+use std::time::Duration;
 
 #[derive(Clone, Debug)]
 pub(crate) struct OAuth {
@@ -39,19 +39,21 @@ async fn oauth_start_goog(req: HttpRequest) -> crate::Result<impl Responder> {
     let redirect_uri = format!("{}/api/login/google", data.oauth.frontend_url);
 
     let goog_request = data.client
-                .get("https://accounts.google.com/o/oauth2/v2/auth")
-                .query(&[
-                    ("client_id", &*data.oauth.google.client_id),
-                    ("redirect_uri", &*redirect_uri),
-                    ("response_type", "code"),
-                    ("state", state.to_string().as_str()),
-                    ("scope", "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile"),
-                ])
-                .build()?;
+        .get("https://accounts.google.com/o/oauth2/v2/auth")
+        .query(&[
+            ("client_id", &*data.oauth.google.client_id),
+            ("redirect_uri", &*redirect_uri),
+            ("response_type", "code"),
+            ("state", state.to_string().as_str()),
+            ("scope", "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile"),
+        ])
+        .build()?;
 
     let jwt = GoogleOAuthJWT {
         state: state.to_string(),
-        exp: UtcDateTime::now().add(Duration::from_secs(5 * 60)).unix_timestamp() as usize,
+        exp: UtcDateTime::now()
+            .add(Duration::from_secs(5 * 60))
+            .unix_timestamp() as usize,
     };
 
     let encoded = jsonwebtoken::encode(
@@ -59,7 +61,7 @@ async fn oauth_start_goog(req: HttpRequest) -> crate::Result<impl Responder> {
         &jwt,
         &jsonwebtoken::EncodingKey::from_secret(&data.jwt_secret),
     )
-    .context("build JWT token")?;
+        .context("build JWT token")?;
 
     // give back the google URL and the state
 
@@ -82,6 +84,21 @@ struct OAuthCbGoogQuery {
     state: String,
 }
 
+#[derive(Serialize)]
+enum CompletedAuthMethod {
+    Google {
+        user_id: String,
+        name: String,
+        avatar_url: String,
+    }
+}
+
+#[derive(Serialize)]
+struct CompletedAuth {
+    // exp: usize,
+    kind: CompletedAuthMethod,
+}
+
 #[get("/oauth/cb/goog")]
 async fn oauth_cb_goog(
     info: Query<OAuthCbGoogQuery>,
@@ -91,7 +108,7 @@ async fn oauth_cb_goog(
 
     // client has their "correct state" in the signed cookie
     let cookie_value = match req.cookie("oauth_state") {
-        None => return Ok(("no state", StatusCode::BAD_REQUEST)),
+        None => return Ok(HttpResponse::build(StatusCode::BAD_REQUEST).body("no state")),
         Some(state) => state.value().to_owned(),
     };
 
@@ -101,22 +118,33 @@ async fn oauth_cb_goog(
         &Validation::default(),
     )?;
 
-    // check token data matches state query param
     if token.claims.state != info.state {
-        return Ok(("state mismatch", StatusCode::BAD_REQUEST))
+        return Ok(HttpResponse::build(StatusCode::BAD_REQUEST).body("state mismatch"));
     }
 
-    // wipe oauth_state cookie
+    // TODO: does this expire?
+    let jwt = CompletedAuth {
+        kind: CompletedAuthMethod::Google {
+            user_id: String::from("user id"),
+            name: String::from("name"),
+            avatar_url: String::from("avatar url"),
+            // email?
+        },
+    };
 
-    // create a new jwt cookie to serve as auth for the current user.
-    // might include: user id, name, pfp, (email?)
+    let encoded = jsonwebtoken::encode(
+        &Header::default(),
+        &jwt,
+        &jsonwebtoken::EncodingKey::from_secret(&data.jwt_secret),
+    ).context("build auth jwt")?;
 
-    // set that new cookie on the response
+    let mut resp = HttpResponse::build(StatusCode::OK)
+        .cookie(Cookie::build("auth", encoded.to_string())
+            .same_site(SameSite::Lax)
+            .finish())
+        .body("hi");
+    resp.add_removal_cookie(req.cookie("oauth_state").as_ref().unwrap())
+        .context("create oauth_state removal cookie")?;
 
-    // return the user profile url/email/name
-    // Response<200>{ ..Profile.. }
-    // Set-Cookie: sess=...;
-    // need to give JS side user profile URL and email
-
-    Ok(("hi", StatusCode::OK))
+    Ok(resp)
 }
