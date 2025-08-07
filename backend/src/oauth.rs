@@ -2,8 +2,9 @@ use crate::AppData;
 use actix_web::cookie::{Cookie, SameSite};
 use actix_web::web::Query;
 use actix_web::{HttpRequest, HttpResponse, Responder, cookie, get};
+use actix_web::http::StatusCode;
 use anyhow::Context;
-use jsonwebtoken::Header;
+use jsonwebtoken::{DecodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug)]
@@ -80,9 +81,15 @@ struct OAuthCbGoogQuery {
 }
 
 #[get("/oauth/cb/goog")]
-async fn oauth_cb_goog(info: Query<OAuthCbGoogQuery>) -> impl Responder {
-    dbg!(info);
+async fn oauth_cb_goog(info: Query<OAuthCbGoogQuery>, req: HttpRequest) -> impl Responder {
+    let data = *req.app_data::<&AppData>().unwrap();
+
     // client has their "correct state" in the signed cookie
+    let token = jsonwebtoken::decode::<GoogleOAuthJWT>(match req.cookie("oauth_state") {
+        None => return ("no state", StatusCode::BAD_REQUEST),
+        Some(state) => state.value()
+    }, &DecodingKey::from_secret(&*data.jwt_secret), &Validation::default())?;
+
     // need to give JS side user profile URL and email
 
     "hi"
