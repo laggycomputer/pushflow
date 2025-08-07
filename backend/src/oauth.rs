@@ -30,7 +30,7 @@ async fn oauth_start_goog(req: HttpRequest) -> crate::Result<impl Responder> {
 
     let state = uuid::Uuid::new_v4();
 
-    let redirect_uri = format!("{}/oauth/cb/goog", data.oauth.frontend_url);
+    let redirect_uri = format!("{}/api/login/google", data.oauth.frontend_url);
 
     let goog_response = data.client
         .execute(
