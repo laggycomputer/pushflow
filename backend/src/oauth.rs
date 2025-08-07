@@ -38,7 +38,6 @@ async fn oauth_start_goog(req: HttpRequest) -> crate::Result<impl Responder> {
                 .get("https://accounts.google.com/o/oauth2/v2/auth")
                 .query(&[
                     ("client_id", &*data.oauth.google.client_id),
-                    // TODO: this redirect will be in the JS backend
                     ("redirect_uri", &*redirect_uri),
                     ("response_type", "code"),
                     ("state", state.to_string().as_str()),
@@ -73,7 +72,7 @@ async fn oauth_start_goog(req: HttpRequest) -> crate::Result<impl Responder> {
         .body(goog_response.url().as_str().to_owned()))
 }
 
-// JS backend will give us the query params unchanged
+// JS will give us the query params unchanged
 #[derive(Debug, Deserialize)]
 struct OAuthCbGoogQuery {
     error: Option<String>,
@@ -83,9 +82,8 @@ struct OAuthCbGoogQuery {
 #[get("/oauth/cb/goog")]
 async fn oauth_cb_goog(info: Query<OAuthCbGoogQuery>) -> impl Responder {
     dbg!(info);
-    // Google redirects user to /oauth/cb/goog?code=xxxxxxx&state=xxxxxx&...
     // client has their "correct state" in the signed cookie
-    // need to give JS backend user profile URL and email
+    // need to give JS side user profile URL and email
 
     "hi"
 }
