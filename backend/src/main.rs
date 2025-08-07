@@ -40,6 +40,9 @@ struct AppData {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    // if this fails (i.e. railway deployment, not local), meh
+    let _ = dotenv::dotenv();
+
     let port = std::env::var("PORT")
         .unwrap_or(String::from("1451"))
         .parse::<u16>()
