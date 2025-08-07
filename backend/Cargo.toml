@@ -9,7 +9,6 @@ actix-web = "4.11.0"
 tokio = { version = "1", features = ["full"] }
 jsonwebtoken = "9"
 serde = {version = "1.0", features = ["derive"] }
-dotenv = "0.15.0"
 reqwest = "0.12.22"
 uuid = { version = "1.17.0", features = ["v4"] }
 cookie = "0.18.1"

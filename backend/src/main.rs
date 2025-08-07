@@ -38,8 +38,6 @@ struct AppData {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    dotenv::dotenv().ok().context("read dotenv")?;
-
     let port = std::env::var("PORT")
         .unwrap_or(String::from("1451"))
         .parse::<u16>()
