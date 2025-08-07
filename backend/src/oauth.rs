@@ -38,7 +38,6 @@ async fn oauth_start_goog(req: HttpRequest) -> crate::Result<impl Responder> {
                 .get("https://accounts.google.com/o/oauth2/v2/auth")
                 .query(&[
                     ("client_id", &*data.oauth.google.client_id),
-                    // TODO: this redirect will be in the JS backend
                     ("redirect_uri", &*redirect_uri),
                     ("response_type", "code"),
                     ("state", state.to_string().as_str()),
