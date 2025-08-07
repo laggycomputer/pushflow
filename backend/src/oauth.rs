@@ -2,7 +2,7 @@ use crate::AppData;
 use actix_web::cookie::{Cookie, SameSite};
 use actix_web::http::StatusCode;
 use actix_web::web::Query;
-use actix_web::{cookie, get, HttpRequest, HttpResponse, Responder};
+use actix_web::{HttpRequest, HttpResponse, Responder, cookie, get};
 use anyhow::Context;
 use jsonwebtoken::{DecodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
@@ -33,9 +33,7 @@ async fn oauth_start_goog(req: HttpRequest) -> crate::Result<impl Responder> {
 
     let redirect_uri = format!("{}/api/login/google", data.oauth.frontend_url);
 
-    let goog_response = data.client
-        .execute(
-            data.client
+    let goog_request =            data.client
                 .get("https://accounts.google.com/o/oauth2/v2/auth")
                 .query(&[
                     ("client_id", &*data.oauth.google.client_id),
@@ -44,10 +42,7 @@ async fn oauth_start_goog(req: HttpRequest) -> crate::Result<impl Responder> {
                     ("state", state.to_string().as_str()),
                     ("scope", "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile"),
                 ])
-                .build()?,
-        )
-        .await
-        .context("init oauth with goog")?;
+                .build()?;
 
     let jwt = GoogleOAuthJWT {
         state: state.to_string(),
@@ -70,7 +65,7 @@ async fn oauth_start_goog(req: HttpRequest) -> crate::Result<impl Responder> {
                 .same_site(SameSite::Lax)
                 .finish(),
         )
-        .body(goog_response.url().as_str().to_owned()))
+        .body(goog_request.url().as_str().to_owned()))
 }
 
 // JS will give us the query params unchanged
@@ -78,6 +73,7 @@ async fn oauth_start_goog(req: HttpRequest) -> crate::Result<impl Responder> {
 struct OAuthCbGoogQuery {
     error: Option<String>,
     code: Option<String>,
+    state: String,
 }
 
 #[get("/oauth/cb/goog")]
@@ -98,6 +94,8 @@ async fn oauth_cb_goog(
         &DecodingKey::from_secret(&*data.jwt_secret),
         &Validation::default(),
     )?;
+
+    // check token data matches state query param
 
     // need to give JS side user profile URL and email
 
