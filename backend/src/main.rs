@@ -48,6 +48,8 @@ async fn main() -> anyhow::Result<()> {
     let app_data = Box::leak(Box::new(AppData {
         client: reqwest::Client::new(),
         oauth: OAuth {
+            frontend_url: std::env::var("FRONTEND_URL")
+                .context("read env var FRONTEND_URL")?,
             google: GoogleOAuthConfig {
                 client_id: std::env::var("GOOGLE_OAUTH_CLIENT_ID")
                     .context("read env var GOOGLE_OAUTH_CLIENT_ID")?,

@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug)]
 pub(crate) struct OAuth {
+    pub(crate) frontend_url: String,
     pub(crate) google: GoogleOAuthConfig,
 }
 
