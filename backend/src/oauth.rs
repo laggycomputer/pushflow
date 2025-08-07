@@ -1,8 +1,11 @@
+use std::ops::Add;
+use std::time::Duration;
 use crate::AppData;
 use actix_web::cookie::{Cookie, SameSite};
 use actix_web::http::StatusCode;
 use actix_web::web::Query;
 use actix_web::{HttpRequest, HttpResponse, Responder, cookie, get};
+use actix_web::cookie::time::UtcDateTime;
 use anyhow::Context;
 use jsonwebtoken::{DecodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
@@ -23,6 +26,8 @@ pub(crate) struct GoogleOAuthConfig {
 struct GoogleOAuthJWT {
     // this is supposed to be a UUIDv4
     state: String,
+    // UTC timestamp
+    exp: usize,
 }
 
 #[get("/oauth/start/goog")]
@@ -46,6 +51,7 @@ async fn oauth_start_goog(req: HttpRequest) -> crate::Result<impl Responder> {
 
     let jwt = GoogleOAuthJWT {
         state: state.to_string(),
+        exp: UtcDateTime::now().add(Duration::from_secs(5 * 60)).unix_timestamp() as usize,
     };
 
     let encoded = jsonwebtoken::encode(
