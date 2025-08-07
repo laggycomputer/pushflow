@@ -1,7 +1,7 @@
 use crate::AppData;
 use actix_web::cookie::{Cookie, SameSite};
 use actix_web::web::Query;
-use actix_web::{cookie, get, HttpRequest, HttpResponse, Responder};
+use actix_web::{HttpRequest, HttpResponse, Responder, cookie, get};
 use anyhow::Context;
 use jsonwebtoken::Header;
 use serde::{Deserialize, Serialize};
@@ -31,7 +31,7 @@ async fn oauth_start_goog(req: HttpRequest) -> crate::Result<impl Responder> {
     let state = uuid::Uuid::new_v4();
 
     let redirect_uri = format!("{}/oauth/cb/goog", data.oauth.frontend_url);
-    
+
     let goog_response = data.client
         .execute(
             data.client
@@ -53,17 +53,22 @@ async fn oauth_start_goog(req: HttpRequest) -> crate::Result<impl Responder> {
         state: state.to_string(),
     };
 
-    let encoded = jsonwebtoken::encode(&Header::default(), &jwt, &jsonwebtoken::EncodingKey::from_secret(&*data.jwt_secret))
-        .context("build JWT token")?;
+    let encoded = jsonwebtoken::encode(
+        &Header::default(),
+        &jwt,
+        &jsonwebtoken::EncodingKey::from_secret(&*data.jwt_secret),
+    )
+    .context("build JWT token")?;
 
     // give back the google URL and the state
 
     Ok(HttpResponse::Ok()
-        .cookie(Cookie::build("oauth_state", encoded.to_string())
-            .max_age(cookie::time::Duration::minutes(5))
-            // not defaulted on firefox and safari
-            .same_site(SameSite::Lax)
-            .finish()
+        .cookie(
+            Cookie::build("oauth_state", encoded.to_string())
+                .max_age(cookie::time::Duration::minutes(5))
+                // not defaulted on firefox and safari
+                .same_site(SameSite::Lax)
+                .finish(),
         )
         .body(goog_response.url().as_str().to_owned()))
 }

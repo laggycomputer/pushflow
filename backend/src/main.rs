@@ -1,6 +1,6 @@
 mod oauth;
 
-use crate::oauth::{oauth_cb_goog, oauth_start_goog, GoogleOAuthConfig, OAuth};
+use crate::oauth::{GoogleOAuthConfig, OAuth, oauth_cb_goog, oauth_start_goog};
 use actix_web::{App, HttpServer, ResponseError};
 use anyhow::Context;
 use std::ffi::OsString;
@@ -17,7 +17,9 @@ impl Display for AnyhowBridge {
 }
 
 impl<T> From<T> for AnyhowBridge
-    where T: Into<anyhow::Error> {
+where
+    T: Into<anyhow::Error>,
+{
     fn from(value: T) -> Self {
         Self(value.into())
     }
@@ -46,8 +48,7 @@ async fn main() -> anyhow::Result<()> {
     let app_data = Box::leak(Box::new(AppData {
         client: reqwest::Client::new(),
         oauth: OAuth {
-            frontend_url: std::env::var("FRONTEND_URL")
-                .context("read env var FRONTEND_URL")?,
+            frontend_url: std::env::var("FRONTEND_URL").context("read env var FRONTEND_URL")?,
             google: GoogleOAuthConfig {
                 client_id: std::env::var("GOOGLE_OAUTH_CLIENT_ID")
                     .context("read env var GOOGLE_OAUTH_CLIENT_ID")?,
@@ -55,9 +56,12 @@ async fn main() -> anyhow::Result<()> {
                     .context("read env var GOOGLE_OAUTH_CLIENT_SECRET")?,
             },
         },
-        jwt_secret: Box::from(std::env::var_os("JWT_SECRET")
-            .unwrap_or(OsString::from("0f3c13e6a2fc1e6ed08ed391de5e89276f72bb3a")).as_encoded_bytes()
-)    }));
+        jwt_secret: Box::from(
+            std::env::var_os("JWT_SECRET")
+                .unwrap_or(OsString::from("0f3c13e6a2fc1e6ed08ed391de5e89276f72bb3a"))
+                .as_encoded_bytes(),
+        ),
+    }));
 
     let server = {
         HttpServer::new(|| {
