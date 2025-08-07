@@ -80,7 +80,7 @@ async fn oauth_cb_goog(info: Query<OAuthCbGoogQuery>) -> impl Responder {
     dbg!(info);
     // Google redirects user to /oauth/cb/goog?code=xxxxxxx&state=xxxxxx&...
     // client has their "correct state" in the signed cookie
-    // check that the state you get from state=xxxxx si the same as the signed goo
+    // need to give JS backend user profile URL and email
 
     "hi"
 }
