@@ -1,0 +1,82 @@
+@mixin theme-flow-dark() {
+  --bg-main: #020B17;
+  --bg-gradient-start: #66AFCC;
+  --bg-gradient-end: #1F607A;
+  --bg-flow-shade: #666666;
+  
+  --bg-card-outer: linear-gradient(-30deg, color-mix(in srgb, var(--bg-gradient-start) 20%, transparent) 0%, color-mix(in srgb, var(--bg-gradient-start) 20%, transparent) 100%);
+  --shadow-card-backdrop: 2px 2px 16px rgba(0, 0, 0, 0.25);
+  --shadow-card-inner: inset -1px -1px 2px #ffffff40, inset 1px 1px 2px #ffffff40;
+  --padding-card-outer: 8px;
+  --border-radius-card: 4px;
+
+  --bg-card-inner: #1F272E;
+  --padding-card-inner: 12px 12px 16px 16px;
+
+  --col-emphasis-top: #ffffff80;
+  --shadow-emphasis: inset 1px 1px 2px var(--col-emphasis-top), inset -1px -1px 2px #ffffff40;
+  --border-radius-emphasis: 10000px;
+
+  --separator-width: 0.25px;
+
+  --opacity-text-secondary: 0.65;
+}
+
+:root {
+  --background: #171717;
+  --foreground: #fff;
+
+  @include theme-flow-dark();
+
+  $main-80: color-mix(in srgb, var(--bg-main) 80%, transparent);
+  background-color: var(--bg-main);
+  background-image: linear-gradient($main-80, $main-80), url('/flow-base-background.png');
+  background-size: cover;
+}
+
+html, body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+@media (prefers-color-scheme: dark) {
+  html {
+    color-scheme: dark;
+  }
+}
+
+body {
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+// MUI Overrides
+.MuiButtonGroup-root {
+  .MuiButton-sizeSmall { min-width: 0; }
+  .MuiButtonGroup-firstButton.MuiButton-sizeSmall { padding-left: 10px; }
+  .MuiButtonGroup-lastButton.MuiButton-sizeSmall { padding-right: 10px; }
+
+  .MuiDivider-root {
+    box-shadow: 0 0 1px var(--col-emphasis-top);
+    border-right: var(--separator-width) solid var(--col-emphasis-top);
+    margin-right: calc(-1 * var(--separator-width));
+  }
+
+}
+
+.MuiButton-sizeSmall .MuiSvgIcon-root {
+  font-size: 20px;
+}
