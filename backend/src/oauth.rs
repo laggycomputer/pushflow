@@ -102,7 +102,20 @@ async fn oauth_cb_goog(
     )?;
 
     // check token data matches state query param
+    if token.claims.state != info.state {
+        return Ok(("state mismatch", StatusCode::BAD_REQUEST))
+    }
 
+    // wipe oauth_state cookie
+
+    // create a new jwt cookie to serve as auth for the current user.
+    // might include: user id, name, pfp, (email?)
+
+    // set that new cookie on the response
+
+    // return the user profile url/email/name
+    // Response<200>{ ..Profile.. }
+    // Set-Cookie: sess=...;
     // need to give JS side user profile URL and email
 
     Ok(("hi", StatusCode::OK))
