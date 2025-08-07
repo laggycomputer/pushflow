@@ -1,0 +1,23 @@
+.app-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 12px 20px;
+  gap: 12px;
+  background: rgba(102, 102, 102, 0.2);
+  box-shadow: var(--shadow-card-backdrop), inset 0px -1px 2px rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+
+  h1 {
+    margin-right: auto;
+  }
+
+  .MuiButton-root {
+    height: 40px;
+  }
+}

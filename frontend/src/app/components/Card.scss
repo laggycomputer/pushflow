@@ -1,0 +1,26 @@
+.card-outer {
+  background-image: var(--bg-card-outer);
+  box-shadow: var(--shadow-card-backdrop), var(--shadow-card-inner);
+  padding: var(--padding-card-outer);
+  border-radius: var(--border-radius-card);
+}
+
+.card-inner {
+  background-color: var(--bg-card-inner);
+  padding: var(--padding-card-inner);
+  border-radius: var(--border-radius-card);
+}
+
+.card-header {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  h2 {
+    font-size: 24px;
+    margin-right: auto;
+  }
+  .MuiIconButton-root {
+    width: 32px;
+    height: 32px;
+  }
+}
