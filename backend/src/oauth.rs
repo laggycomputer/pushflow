@@ -30,6 +30,8 @@ async fn oauth_start_goog(req: HttpRequest) -> crate::Result<impl Responder> {
 
     let state = uuid::Uuid::new_v4();
 
+    let redirect_uri = format!("{}/oauth/cb/goog", data.oauth.frontend_url);
+    
     let goog_response = data.client
         .execute(
             data.client
@@ -37,7 +39,7 @@ async fn oauth_start_goog(req: HttpRequest) -> crate::Result<impl Responder> {
                 .query(&[
                     ("client_id", &*data.oauth.google.client_id),
                     // TODO: this redirect will be in the JS backend
-                    ("redirect_uri", "http://localhost:1451/oauth/cb/goog"),
+                    ("redirect_uri", &*redirect_uri),
                     ("response_type", "code"),
                     ("state", state.to_string().as_str()),
                     ("scope", "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile"),
