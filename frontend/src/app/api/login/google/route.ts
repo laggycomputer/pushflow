@@ -13,6 +13,6 @@ export async function GET (request: NextRequest) {
   const headers = { Cookie: oauthState.value }
   const oauthResponse = await fetch(url, { headers })
   console.log(headers, oauthResponse)
-  cookieStore.set("session", oauthResponse.headers.getSetCookie().find(c => c.startsWith('id='))!)
+  cookieStore.set("session", oauthResponse.headers.getSetCookie().find(c => c.startsWith('session='))!)
   return NextResponse.json(await oauthResponse.text())
 }

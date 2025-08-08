@@ -104,13 +104,13 @@ async fn main() -> anyhow::Result<()> {
 
     let server = {
         HttpServer::new(move || {
-            let session_middle = SessionMiddleware::new(
+            let session_middle = SessionMiddleware::builder(
                 session_store.clone(),
                 match std::env::var("FREEZE_SESSION_KEY") {
                     Ok(_) => Key::from(&FIXED_SESSION_KEY),
                     Err(_) => Key::generate()
                 },
-            );
+            ).cookie_name(String::from("session")).build();
 
             App::new()
                 .app_data(app_data)
