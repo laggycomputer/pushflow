@@ -3,9 +3,11 @@ use actix_web::cookie::time::UtcDateTime;
 use actix_web::cookie::{Cookie, SameSite};
 use actix_web::http::StatusCode;
 use actix_web::web::Query;
-use actix_web::{HttpRequest, HttpResponse, Responder, cookie, get};
+use actix_web::{cookie, get, HttpRequest, HttpResponse, Responder};
 use anyhow::Context;
-use jsonwebtoken::{DecodingKey, Header, Validation};
+use entity::users;
+use jsonwebtoken::{Header, Validation};
+use sea_orm::{sea_query, ActiveValue, EntityTrait, QueryTrait};
 use serde::{Deserialize, Serialize};
 use std::ops::Add;
 use std::time::Duration;
@@ -56,12 +58,8 @@ async fn oauth_start_goog(req: HttpRequest) -> crate::Result<impl Responder> {
             .unix_timestamp() as usize,
     };
 
-    let encoded = jsonwebtoken::encode(
-        &Header::default(),
-        &jwt,
-        &data.jwt_keys.0,
-    )
-    .context("build JWT token")?;
+    let encoded = jsonwebtoken::encode(&Header::default(), &jwt, &data.jwt_keys.0)
+        .context("build JWT token")?;
 
     // give back the google URL and the state
 
@@ -179,8 +177,6 @@ async fn oauth_cb_goog(
     .await
     .context("parse exchange response")?;
 
-    dbg!(&exchange_response);
-
     // i don't think there's a way the user could deny scopes if we set them correctly, so let's not check again
 
     let userinfo_response = data
@@ -197,23 +193,34 @@ async fn oauth_cb_goog(
         .await
         .context("parse userinfo response")?;
 
-    dbg!(&userinfo_response);
+    let new_user = users::ActiveModel {
+        user_id: ActiveValue::Set(uuid::Uuid::new_v4()),
+        goog_id: ActiveValue::Set(Some(userinfo_response.id.clone())),
+        picture: ActiveValue::Set(Some(userinfo_response.picture.clone())),
+    };
+
+    let query = users::Entity::insert(new_user.clone()).on_conflict(
+        sea_query::OnConflict::column(users::Column::GoogId)
+            .update_column(users::Column::Picture)
+            .to_owned(),
+    );
+
+    let user = query
+        .exec_with_returning(&data.db)
+        .await
+        .context("upsert user")?;
 
     let jwt = CompletedAuth {
         // session may expire a tad early
         exp: exp_base
             .add(Duration::from_secs(exchange_response.expires_in as u64))
             .unix_timestamp() as usize,
-        user_id: todo!("user id"),
+        user_id: user.user_id.to_string(),
         kind: CompletedAuthMethod::Google(userinfo_response),
     };
 
-    let encoded = jsonwebtoken::encode(
-        &Header::default(),
-        &jwt,
-        &data.jwt_keys.0,
-    )
-    .context("make cb jwt")?;
+    let encoded =
+        jsonwebtoken::encode(&Header::default(), &jwt, &data.jwt_keys.0).context("make cb jwt")?;
 
     let remove_oauth_state = {
         let mut ret = req.cookie("oauth_state").unwrap();
