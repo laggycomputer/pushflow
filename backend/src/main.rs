@@ -2,7 +2,7 @@ mod gated;
 mod oauth;
 
 use crate::oauth::{GoogleOAuthConfig, OAuth};
-use actix_session::storage::{RedisSessionStore, SessionStore};
+use actix_session::storage::RedisSessionStore;
 use actix_session::SessionMiddleware;
 use actix_web::cookie::Key;
 use actix_web::{App, HttpServer, ResponseError};
