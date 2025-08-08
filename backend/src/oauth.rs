@@ -219,7 +219,7 @@ pub(crate) mod cb {
             .await
             .context("upsert user")?;
 
-        dbg!(session);
+        dbg!(session.entries());
         session.purge();
         session
             .insert(
