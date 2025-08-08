@@ -32,7 +32,7 @@ struct GoogleOAuthJWT {
     exp: usize,
 }
 
-#[get("/oauth/start/goog")]
+#[get("/start/goog")]
 async fn oauth_start_goog(req: HttpRequest) -> crate::Result<impl Responder> {
     let data = *req.app_data::<&AppData>().unwrap();
 
@@ -111,7 +111,7 @@ struct GoogleUserInfoResponse {
     id: String,
 }
 
-#[get("/oauth/cb/goog")]
+#[get("/cb/goog")]
 async fn oauth_cb_goog(
     info: Query<OAuthCbGoogQuery>,
     req: HttpRequest,

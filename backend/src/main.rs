@@ -1,6 +1,6 @@
 mod oauth;
 
-use crate::oauth::{GoogleOAuthConfig, OAuth, oauth_cb_goog, oauth_start_goog};
+use crate::oauth::{oauth_cb_goog, oauth_start_goog, GoogleOAuthConfig, OAuth};
 use actix_web::{App, HttpServer, ResponseError};
 use anyhow::Context;
 use migration::{Migrator, MigratorTrait};
@@ -79,10 +79,11 @@ async fn main() -> anyhow::Result<()> {
 
     let server = {
         HttpServer::new(|| {
-            App::new()
-                .app_data(&*app_data)
-                .service(oauth_start_goog)
-                .service(oauth_cb_goog)
+            App::new().app_data(&*app_data).service(
+                actix_web::web::scope("/oauth")
+                    .service(oauth_start_goog)
+                    .service(oauth_cb_goog),
+            )
         })
         .bind(("127.0.0.1", port))
         .with_context(|| format!("bind to port {port}"))
