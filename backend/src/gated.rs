@@ -9,6 +9,6 @@ pub(crate) struct SessionUser {
 }
 
 #[get("/check_auth")]
-pub async fn check_auth(session: actix_web::web::Data<Session>) -> crate::Result<impl Responder> {
+pub async fn check_auth(session: Session) -> crate::Result<impl Responder> {
     Ok(format!("{:?}", session.entries().to_owned()))
 }
