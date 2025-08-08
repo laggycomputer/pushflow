@@ -12,8 +12,8 @@ impl MigrationTrait for Migration {
                     .table(Users::Table)
                     .if_not_exists()
                     .col(pk_uuid(Users::UserId))
-                    .col(string_null(Users::GoogId))
                     .col(string(Users::Picture))
+                    .col(string_null(Users::GoogId).unique_key())
                     .to_owned(),
             )
             .await
