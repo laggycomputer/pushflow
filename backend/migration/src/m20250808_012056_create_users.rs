@@ -11,7 +11,7 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(Users::Table)
                     .if_not_exists()
-                    .col(pk_uuid(Users::UserId).default("gen_random_uuid()"))
+                    .col(pk_uuid(Users::UserId))
                     .col(string(Users::GoogId).null())
                     .col(string(Users::Picture))
                     .to_owned(),
