@@ -19,7 +19,8 @@ sea-orm = { version = "1.1.0", features = ["sqlx-postgres", "runtime-tokio", "ma
 entity = { path = "entity" }
 migration = { path = "migration" }
 actix-session = { version = "0.10.1", features = ["redis-session", "redis-pool"] }
-encoded = "0.4.2"
+# this silently has to match actix-session
+deadpool-redis = "0.16.0"
 
 [profile.release]
 lto = "fat"

@@ -2,11 +2,12 @@ mod gated;
 mod oauth;
 
 use crate::oauth::{GoogleOAuthConfig, OAuth};
-use actix_session::SessionMiddleware;
 use actix_session::storage::{RedisSessionStore, SessionStore};
+use actix_session::SessionMiddleware;
 use actix_web::cookie::Key;
 use actix_web::{App, HttpServer, ResponseError};
 use anyhow::Context;
+use deadpool_redis::{Config, Runtime};
 use migration::{Migrator, MigratorTrait};
 use std::ffi::OsString;
 use std::fmt::{Display, Formatter};
@@ -65,9 +66,13 @@ async fn main() -> anyhow::Result<()> {
         .unwrap_or(OsString::from("0f3c13e6a2fc1e6ed08ed391de5e89276f72bb3a"));
 
     let redis_url = std::env::var("REDIS_URL").context("need env var REDIS_URL")?;
-    let session_store = RedisSessionStore::new_pooled(&redis_url)
-        .await
-        .with_context(|| format!("connect to redis at {redis_url}"))?;
+    let session_store = RedisSessionStore::new_pooled(
+        Config::from_url(&redis_url)
+            .create_pool(Some(Runtime::Tokio1))
+            .context("create redis pool")?,
+    )
+    .await
+    .with_context(|| format!("connect to redis at {redis_url}"))?;
 
     let app_data = &*Box::leak::<'static>(Box::new(AppData {
         client: reqwest::Client::new(),

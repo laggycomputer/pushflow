@@ -1141,16 +1141,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "encoded"
-version = "0.4.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6ff28b7eab65818b630538cb3b4adefe816bb2542243b5e766dd1722052f1354"
-dependencies = [
- "encoding_rs",
- "litrs",
-]
-
-[[package]]
 name = "encoding_rs"
 version = "0.8.35"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2030,15 +2020,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "241eaef5fd12c88705a01fc1066c48c4b36e0dd4377dcdc7ec3942cea7a69956"
 
 [[package]]
-name = "litrs"
-version = "0.2.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f9275e0933cf8bb20f008924c0cb07a0692fe54d8064996520bf998de9eb79aa"
-dependencies = [
- "proc-macro2",
-]
-
-[[package]]
 name = "local-channel"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2591,8 +2572,8 @@ dependencies = [
  "actix-session",
  "actix-web",
  "anyhow",
+ "deadpool-redis",
  "dotenv",
- "encoded",
  "entity",
  "jsonwebtoken",
  "migration",
