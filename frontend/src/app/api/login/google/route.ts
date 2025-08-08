@@ -13,5 +13,6 @@ export async function GET (request: NextRequest) {
 
   const sidCookie = oauthResponse.headers.getSetCookie().find(c => c.startsWith('session='))!
   cookieStore.set("session", sidCookie)
+
   return NextResponse.json(await oauthResponse.text())
 }
