@@ -12,7 +12,7 @@ impl MigrationTrait for Migration {
                     .table(Users::Table)
                     .if_not_exists()
                     .col(pk_uuid(Users::UserId))
-                    .col(string(Users::GoogId).null())
+                    .col(string_null(Users::GoogId))
                     .col(string(Users::Picture))
                     .to_owned(),
             )
