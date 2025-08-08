@@ -4,8 +4,9 @@ mod oauth;
 use crate::oauth::{GoogleOAuthConfig, OAuth};
 use actix_session::SessionMiddleware;
 use actix_session::storage::RedisSessionStore;
+use actix_web::Responder;
 use actix_web::cookie::Key;
-use actix_web::{App, HttpServer, ResponseError};
+use actix_web::{App, HttpServer, ResponseError, get, web};
 use anyhow::Context;
 use deadpool_redis::{Config, Runtime};
 use migration::{Migrator, MigratorTrait};
@@ -50,6 +51,11 @@ struct AppData {
     oauth: OAuth,
     jwt_keys: (jsonwebtoken::EncodingKey, jsonwebtoken::DecodingKey),
     db: sea_orm::DatabaseConnection,
+}
+
+#[get("/ping")]
+async fn ping() -> impl Responder {
+    "pong"
 }
 
 #[tokio::main]
@@ -112,14 +118,15 @@ async fn main() -> anyhow::Result<()> {
 
             App::new()
                 .app_data(app_data)
-                .service(actix_web::web::scope("/oauth/start").service(oauth::start::goog))
+                .service(ping)
+                .service(web::scope("/oauth/start").service(oauth::start::goog))
                 .service(
-                    actix_web::web::scope("/oauth/cb")
+                    web::scope("/oauth/cb")
                         .service(oauth::cb::goog)
                         .wrap(session_middle.clone()),
                 )
                 .service(
-                    actix_web::web::scope("/gated")
+                    web::scope("/gated")
                         .service(gated::check_auth)
                         .service(gated::logout)
                         .wrap(session_middle.clone()),
