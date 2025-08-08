@@ -2,4 +2,11 @@
 
 pub mod prelude;
 
+pub mod api_key_scopes;
+pub mod api_keys;
+pub mod group_subscribers;
+pub mod groups;
+pub mod sea_orm_active_enums;
+pub mod services;
+pub mod subscribers;
 pub mod users;
