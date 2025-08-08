@@ -84,6 +84,7 @@ pub(crate) mod cb {
     use jsonwebtoken::Validation;
     use sea_orm::{ActiveValue, EntityTrait, sea_query};
     use serde::{Deserialize, Serialize};
+    use uuid::Uuid;
 
     // JS will give us the query params unchanged
     #[derive(Debug, Deserialize)]
@@ -203,7 +204,7 @@ pub(crate) mod cb {
             .context("parse userinfo response")?;
 
         let new_user = users::ActiveModel {
-            user_id: ActiveValue::Set(uuid::Uuid::new_v4()),
+            user_id: ActiveValue::Set(Uuid::now_v7()),
             goog_id: ActiveValue::Set(Some(userinfo_response.id.clone())),
             picture: ActiveValue::Set(Some(userinfo_response.picture.clone())),
         };
