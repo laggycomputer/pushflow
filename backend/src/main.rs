@@ -109,7 +109,7 @@ async fn main() -> anyhow::Result<()> {
             let session_middle = SessionMiddleware::new(
                 session_store.clone(),
                 match std::env::var("FREEZE_SESSION_KEY") {
-                    Ok(_) => Key::from(&*FIXED_SESSION_KEY),
+                    Ok(_) => Key::from(&FIXED_SESSION_KEY),
                     Err(_) => Key::generate()
                 },
             );
