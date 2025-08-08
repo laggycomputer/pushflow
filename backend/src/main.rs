@@ -123,6 +123,7 @@ async fn main() -> anyhow::Result<()> {
                 .service(
                     actix_web::web::scope("/gated")
                         .service(gated::check_auth)
+                        .service(gated::logout)
                         .wrap(session_middle.clone()),
                 )
         })
