@@ -25,7 +25,7 @@ pub(crate) mod start {
     use crate::AppData;
     use actix_web::cookie::time::UtcDateTime;
     use actix_web::cookie::{Cookie, SameSite};
-    use actix_web::{cookie, get, HttpRequest, HttpResponse, Responder};
+    use actix_web::{HttpRequest, HttpResponse, Responder, cookie, get};
     use anyhow::Context;
     use jsonwebtoken::Header;
     use std::ops::Add;
@@ -74,15 +74,15 @@ pub(crate) mod start {
 }
 
 pub(crate) mod cb {
-    use crate::gated::SessionUser;
     use crate::AppData;
+    use crate::gated::SessionUser;
     use actix_session::Session;
     use actix_web::http::StatusCode;
-    use actix_web::{get, HttpRequest, HttpResponse, Responder};
+    use actix_web::{HttpRequest, HttpResponse, Responder, get};
     use anyhow::Context;
     use entity::users;
     use jsonwebtoken::Validation;
-    use sea_orm::{sea_query, ActiveValue, EntityTrait};
+    use sea_orm::{ActiveValue, EntityTrait, sea_query};
     use serde::{Deserialize, Serialize};
 
     // JS will give us the query params unchanged
