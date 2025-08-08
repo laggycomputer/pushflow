@@ -1,6 +1,10 @@
+mod gated;
 mod oauth;
 
-use crate::oauth::{oauth_cb_goog, oauth_start_goog, GoogleOAuthConfig, OAuth};
+use crate::oauth::{GoogleOAuthConfig, OAuth};
+use actix_session::SessionMiddleware;
+use actix_session::storage::{RedisSessionStore, SessionStore};
+use actix_web::cookie::Key;
 use actix_web::{App, HttpServer, ResponseError};
 use anyhow::Context;
 use migration::{Migrator, MigratorTrait};
@@ -38,6 +42,7 @@ struct AppData {
     oauth: OAuth,
     jwt_keys: (jsonwebtoken::EncodingKey, jsonwebtoken::DecodingKey),
     db: sea_orm::DatabaseConnection,
+    session_store: RedisSessionStore,
 }
 
 #[tokio::main]
@@ -59,7 +64,12 @@ async fn main() -> anyhow::Result<()> {
     let jwt_secret = std::env::var_os("JWT_SECRET")
         .unwrap_or(OsString::from("0f3c13e6a2fc1e6ed08ed391de5e89276f72bb3a"));
 
-    let app_data = Box::leak(Box::new(AppData {
+    let redis_url = std::env::var("REDIS_URL").context("need env var REDIS_URL")?;
+    let session_store = RedisSessionStore::new_pooled(&redis_url)
+        .await
+        .with_context(|| format!("connect to redis at {redis_url}"))?;
+
+    let app_data = &*Box::leak::<'static>(Box::new(AppData {
         client: reqwest::Client::new(),
         oauth: OAuth {
             frontend_url: std::env::var("FRONTEND_URL").context("need env var FRONTEND_URL")?,
@@ -75,15 +85,21 @@ async fn main() -> anyhow::Result<()> {
             jsonwebtoken::DecodingKey::from_secret(jwt_secret.as_encoded_bytes()),
         ),
         db,
+        session_store: session_store.clone(),
     }));
 
     let server = {
-        HttpServer::new(|| {
-            App::new().app_data(&*app_data).service(
-                actix_web::web::scope("/oauth")
-                    .service(oauth_start_goog)
-                    .service(oauth_cb_goog),
-            )
+        HttpServer::new(move || {
+            let session_middle = SessionMiddleware::new(session_store.clone(), Key::generate());
+
+            App::new()
+                .app_data(app_data)
+                .service(actix_web::web::scope("/oauth/start").service(oauth::start::goog))
+                .service(
+                    actix_web::web::scope("/oauth/cb")
+                        .service(oauth::cb::goog)
+                        .wrap(session_middle),
+                )
         })
         .bind(("127.0.0.1", port))
         .with_context(|| format!("bind to port {port}"))
