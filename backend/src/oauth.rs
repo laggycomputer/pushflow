@@ -59,7 +59,7 @@ async fn oauth_start_goog(req: HttpRequest) -> crate::Result<impl Responder> {
     let encoded = jsonwebtoken::encode(
         &Header::default(),
         &jwt,
-        &jsonwebtoken::EncodingKey::from_secret(&data.jwt_secret),
+        &data.jwt_keys.0,
     )
     .context("build JWT token")?;
 
@@ -139,7 +139,7 @@ async fn oauth_cb_goog(
 
     let token = jsonwebtoken::decode::<GoogleOAuthJWT>(
         &cookie_value,
-        &DecodingKey::from_secret(&data.jwt_secret),
+        &data.jwt_keys.1,
         &Validation::default(),
     )?;
 
@@ -211,7 +211,7 @@ async fn oauth_cb_goog(
     let encoded = jsonwebtoken::encode(
         &Header::default(),
         &jwt,
-        &jsonwebtoken::EncodingKey::from_secret(&data.jwt_secret),
+        &data.jwt_keys.0,
     )
     .context("make cb jwt")?;
 

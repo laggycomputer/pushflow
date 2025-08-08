@@ -3,9 +3,9 @@ mod oauth;
 use crate::oauth::{oauth_cb_goog, oauth_start_goog, GoogleOAuthConfig, OAuth};
 use actix_web::{App, HttpServer, ResponseError};
 use anyhow::Context;
+use migration::{Migrator, MigratorTrait};
 use std::ffi::OsString;
 use std::fmt::{Display, Formatter};
-use migration::{Migrator, MigratorTrait};
 
 #[repr(transparent)]
 #[derive(Debug)]
@@ -32,11 +32,11 @@ impl ResponseError for AnyhowBridge {
     // TODO: actual error contents
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 struct AppData {
     client: reqwest::Client,
     oauth: OAuth,
-    jwt_secret: Box<[u8]>,
+    jwt_keys: (jsonwebtoken::EncodingKey, jsonwebtoken::DecodingKey),
     db: sea_orm::DatabaseConnection,
 }
 
@@ -56,6 +56,9 @@ async fn main() -> anyhow::Result<()> {
         .with_context(|| format!("can't connect to db at {database_url}"))?;
     Migrator::up(&db, None).await.context("migrate db")?;
 
+    let jwt_secret = std::env::var_os("JWT_SECRET")
+        .unwrap_or(OsString::from("0f3c13e6a2fc1e6ed08ed391de5e89276f72bb3a"));
+
     let app_data = Box::leak(Box::new(AppData {
         client: reqwest::Client::new(),
         oauth: OAuth {
@@ -67,10 +70,9 @@ async fn main() -> anyhow::Result<()> {
                     .context("need env var GOOGLE_OAUTH_CLIENT_SECRET")?,
             },
         },
-        jwt_secret: Box::from(
-            std::env::var_os("JWT_SECRET")
-                .unwrap_or(OsString::from("0f3c13e6a2fc1e6ed08ed391de5e89276f72bb3a"))
-                .as_encoded_bytes(),
+        jwt_keys: (
+            jsonwebtoken::EncodingKey::from_secret(jwt_secret.as_encoded_bytes()),
+            jsonwebtoken::DecodingKey::from_secret(jwt_secret.as_encoded_bytes()),
         ),
         db,
     }));
