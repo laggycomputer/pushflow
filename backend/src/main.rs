@@ -103,7 +103,12 @@ async fn main() -> anyhow::Result<()> {
                 .service(
                     actix_web::web::scope("/oauth/cb")
                         .service(oauth::cb::goog)
-                        .wrap(session_middle),
+                        .wrap(session_middle.clone()),
+                )
+                .service(
+                    actix_web::web::scope("/gated")
+                        .service(gated::check_auth)
+                        .wrap(session_middle.clone()),
                 )
         })
         .bind(("127.0.0.1", port))
