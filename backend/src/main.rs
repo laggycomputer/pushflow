@@ -1,6 +1,6 @@
 mod oauth;
 
-use crate::oauth::{oauth_cb_goog, oauth_start_goog, GoogleOAuthConfig, OAuth};
+use crate::oauth::{GoogleOAuthConfig, OAuth, oauth_cb_goog, oauth_start_goog};
 use actix_web::{App, HttpServer, ResponseError};
 use anyhow::Context;
 use migration::{Migrator, MigratorTrait};
