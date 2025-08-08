@@ -92,6 +92,7 @@ enum CompletedAuthMethod {
 #[derive(Serialize)]
 struct CompletedAuth {
     exp: usize,
+    user_id: String,
     kind: CompletedAuthMethod,
 }
 
@@ -203,6 +204,7 @@ async fn oauth_cb_goog(
         exp: exp_base
             .add(Duration::from_secs(exchange_response.expires_in as u64))
             .unix_timestamp() as usize,
+        user_id: todo!("user id"),
         kind: CompletedAuthMethod::Google(userinfo_response),
     };
 

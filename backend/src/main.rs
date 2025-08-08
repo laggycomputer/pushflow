@@ -1,10 +1,11 @@
 mod oauth;
 
-use crate::oauth::{GoogleOAuthConfig, OAuth, oauth_cb_goog, oauth_start_goog};
+use crate::oauth::{oauth_cb_goog, oauth_start_goog, GoogleOAuthConfig, OAuth};
 use actix_web::{App, HttpServer, ResponseError};
 use anyhow::Context;
 use std::ffi::OsString;
 use std::fmt::{Display, Formatter};
+use migration::{Migrator, MigratorTrait};
 
 #[repr(transparent)]
 #[derive(Debug)]
@@ -36,6 +37,7 @@ struct AppData {
     client: reqwest::Client,
     oauth: OAuth,
     jwt_secret: Box<[u8]>,
+    db: sea_orm::DatabaseConnection,
 }
 
 #[tokio::main]
@@ -47,6 +49,12 @@ async fn main() -> anyhow::Result<()> {
         .unwrap_or(String::from("1451"))
         .parse::<u16>()
         .context("$PORT not valid u16 port")?;
+
+    let database_url = std::env::var("DATABASE_URL").context("need env var DATABASE_URL")?;
+    let db = sea_orm::Database::connect(&database_url)
+        .await
+        .with_context(|| format!("can't connect to db at {database_url}"))?;
+    Migrator::up(&db, None).await.context("migrate db")?;
 
     let app_data = Box::leak(Box::new(AppData {
         client: reqwest::Client::new(),
@@ -64,6 +72,7 @@ async fn main() -> anyhow::Result<()> {
                 .unwrap_or(OsString::from("0f3c13e6a2fc1e6ed08ed391de5e89276f72bb3a"))
                 .as_encoded_bytes(),
         ),
+        db,
     }));
 
     let server = {
