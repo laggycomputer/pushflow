@@ -126,7 +126,7 @@ async fn main() -> anyhow::Result<()> {
                         .wrap(session_middle.clone()),
                 )
         })
-            .bind(("127.0.0.1", port))
+            .bind(("0.0.0.0", port))
             .with_context(|| format!("bind to port {port}"))
     }?;
 
