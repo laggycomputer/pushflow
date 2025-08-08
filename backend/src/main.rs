@@ -54,7 +54,6 @@ struct AppData {
     oauth: OAuth,
     jwt_keys: (jsonwebtoken::EncodingKey, jsonwebtoken::DecodingKey),
     db: sea_orm::DatabaseConnection,
-    session_store: RedisSessionStore,
 }
 
 #[tokio::main]
@@ -101,7 +100,6 @@ async fn main() -> anyhow::Result<()> {
             jsonwebtoken::DecodingKey::from_secret(jwt_secret.as_encoded_bytes()),
         ),
         db,
-        session_store: session_store.clone(),
     }));
 
     let server = {
