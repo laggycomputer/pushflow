@@ -3,11 +3,11 @@ mod oauth;
 
 use crate::gated::RequireAuthBuilder;
 use crate::oauth::{GoogleOAuthConfig, OAuth};
-use actix_session::storage::RedisSessionStore;
 use actix_session::SessionMiddleware;
-use actix_web::cookie::Key;
+use actix_session::storage::RedisSessionStore;
 use actix_web::Responder;
-use actix_web::{get, web, App, HttpServer, ResponseError};
+use actix_web::cookie::Key;
+use actix_web::{App, HttpServer, ResponseError, get, web};
 use anyhow::Context;
 use deadpool_redis::{Config, Runtime};
 use migration::{Migrator, MigratorTrait};
