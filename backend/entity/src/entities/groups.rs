@@ -9,6 +9,7 @@ pub struct Model {
     pub service_id: Uuid,
     #[sea_orm(primary_key, auto_increment = false)]
     pub group_id: Uuid,
+    pub name: String,
     pub last_notified: Option<DateTime>,
 }
 

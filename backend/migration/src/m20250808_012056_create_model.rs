@@ -36,6 +36,18 @@ impl MigrationTrait for Migration {
                 .await?;
 
             manager
+                .create_index(
+                    Index::create()
+                        .name("unique_service_name")
+                        .table(Services::Table)
+                        .col(Services::OwnerId)
+                        .col(Services::Name)
+                        .unique()
+                        .to_owned(),
+                )
+                .await?;
+
+            manager
                 .create_foreign_key(
                     ForeignKey::create()
                         .from(Services::Table, Services::OwnerId)
@@ -83,12 +95,25 @@ impl MigrationTrait for Migration {
                         .to_owned()
                         .col(uuid(Groups::ServiceId))
                         .col(uuid(Groups::GroupId))
+                        .col(string(Groups::Name))
                         .col(timestamp_null(Groups::LastNotified))
                         .primary_key(Index::create().col(Groups::ServiceId).col(Groups::GroupId))
                         .to_owned(),
                 )
                 .await?;
 
+            manager
+                .create_index(
+                    Index::create()
+                        .name("unique_group_name")
+                        .table(Groups::Table)
+                        .col(Groups::ServiceId)
+                        .col(Groups::Name)
+                        .unique()
+                        .to_owned(),
+                )
+                .await?;
+            
             manager
                 .create_foreign_key(
                     ForeignKey::create()
@@ -145,7 +170,20 @@ impl MigrationTrait for Migration {
                         .table(ApiKeys::Table)
                         .col(uuid(ApiKeys::ServiceId))
                         .col(pk_uuid(ApiKeys::KeyId))
+                        .col(string(ApiKeys::Name))
                         .col(timestamp_null(ApiKeys::LastUsed))
+                        .to_owned(),
+                )
+                .await?;
+
+            manager
+                .create_index(
+                    Index::create()
+                        .name("unique_api_key_name")
+                        .table(ApiKeys::Table)
+                        .col(ApiKeys::ServiceId)
+                        .col(ApiKeys::Name)
+                        .unique()
                         .to_owned(),
                 )
                 .await?;
@@ -322,6 +360,7 @@ enum Groups {
     Table,
     ServiceId,
     GroupId,
+    Name,
     LastNotified,
 }
 
@@ -338,6 +377,7 @@ enum ApiKeys {
     Table,
     ServiceId,
     KeyId,
+    Name,
     LastUsed,
 }
 
