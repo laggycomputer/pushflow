@@ -1,7 +1,7 @@
-use crate::gated::SessionUser;
 use crate::ExtractedAppData;
+use crate::gated::SessionUser;
 use actix_session::Session;
-use actix_web::{get, post, web, HttpResponse, Responder};
+use actix_web::{HttpResponse, Responder, get, post, web};
 use anyhow::Context;
 use entity::services;
 use sea_orm::ColumnTrait;
@@ -17,12 +17,12 @@ struct ReturnedService {
     name: String,
 }
 
-impl Into<ReturnedService> for services::Model {
-    fn into(self) -> ReturnedService {
+impl From<services::Model> for ReturnedService {
+    fn from(val: services::Model) -> Self {
         ReturnedService {
-            service_id: self.service_id,
-            owner_id: self.owner_id,
-            name: self.name,
+            service_id: val.service_id,
+            owner_id: val.owner_id,
+            name: val.name,
         }
     }
 }
