@@ -129,7 +129,7 @@ async fn main() -> anyhow::Result<()> {
                 .service(
                     web::scope("/gated")
                         .wrap(RequireAuthBuilder)
-                        .service(gated::check_auth)
+                        .service(gated::me)
                         .service(gated::logout),
                 )
         })

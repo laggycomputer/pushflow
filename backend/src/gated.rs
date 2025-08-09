@@ -2,10 +2,10 @@ use actix_session::{Session, SessionExt};
 use actix_web::body::EitherBody;
 use actix_web::dev::{Service, ServiceRequest, ServiceResponse, Transform};
 use actix_web::http::StatusCode;
-use actix_web::{HttpResponse, Responder, get};
+use actix_web::{get, HttpResponse, Responder};
 use futures_util::future::LocalBoxFuture;
 use serde::{Deserialize, Serialize};
-use std::future::{Ready, ready};
+use std::future::{ready, Ready};
 use std::task::{Context, Poll};
 use uuid::Uuid;
 
@@ -67,9 +67,12 @@ pub(crate) struct SessionUser {
     pub avatar: Option<String>,
 }
 
-#[get("/check_auth")]
-pub async fn check_auth(session: Session) -> crate::Result<impl Responder> {
-    Ok(format!("{:?}", session.entries()))
+#[get("/me")]
+pub async fn me(session: Session) -> crate::Result<impl Responder> {
+    match session.get::<SessionUser>("user")? {
+        Some(user) => Ok(HttpResponse::Ok().json(user)),
+        None => Ok(HttpResponse::InternalServerError().body("no user??")),
+    }
 }
 
 #[get("/logout")]
