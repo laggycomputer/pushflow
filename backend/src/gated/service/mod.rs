@@ -104,6 +104,6 @@ pub async fn get_one_service(
 
     Ok(match service_by_id_and_owned.first() {
         None => Either::Left(HttpResponse::NotFound()),
-        Some(service) => web::Either::Right(web::Json::<ReturnedService>(service.clone().into())),
+        Some(service) => Either::Right(web::Json::<ReturnedService>(service.clone().into())),
     })
 }
