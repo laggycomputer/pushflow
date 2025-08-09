@@ -22,6 +22,12 @@ fn bounce_no_auth<B>(req: ServiceRequest) -> ServiceResponse<EitherBody<&'static
     )
 }
 
+fn bounce_ambiguous<B>(req: ServiceRequest) -> ServiceResponse<EitherBody<&'static str, B>> {
+    req.into_response(
+        HttpResponse::with_body(StatusCode::NOT_FOUND, "bad id").map_into_left_body(),
+    )
+}
+
 pub struct RequireAuthBuilder;
 
 impl<S, B> Transform<S, ServiceRequest> for RequireAuthBuilder
@@ -131,11 +137,13 @@ where
                     .count(db)
                     .await
                 else {
-                    return Ok(bounce_no_auth(req));
+                    // if db err, just bounce
+                    return Ok(bounce_ambiguous(req));
                 };
 
                 if count == 0 {
-                    return Ok(bounce_no_auth(req));
+                    // service dne or not owned; don't reveal that
+                    return Ok(bounce_ambiguous(req));
                 }
             }
 
