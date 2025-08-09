@@ -1,9 +1,9 @@
 pub(crate) mod group;
 
-use crate::ExtractedAppData;
 use crate::gated::SessionUser;
+use crate::ExtractedAppData;
 use actix_session::Session;
-use actix_web::{HttpResponse, Responder, get, post, web};
+use actix_web::{get, post, web, HttpResponse, Responder};
 use anyhow::Context;
 use entity::services;
 use sea_orm::ColumnTrait;
@@ -65,7 +65,7 @@ async fn post_service(
 
     let vapid = vapid::Key::generate().context("gen new vapid pair")?;
 
-    let service_id = uuid::Uuid::now_v7();
+    let service_id = Uuid::now_v7();
 
     let insert_ent = services::ActiveModel {
         service_id: sea_orm::Set(service_id),
@@ -86,19 +86,10 @@ async fn post_service(
 #[get("")]
 pub async fn get_one_service(
     data: ExtractedAppData,
-    session: Session,
     service_id: web::Path<Uuid>,
 ) -> crate::Result<impl Responder> {
-    let session_user = session
-        .get::<SessionUser>("user")?
-        .context("no session user")?;
-
     let service_by_id_and_owned = services::Entity::find()
-        .filter(
-            services::Column::OwnerId
-                .eq(session_user.user_id)
-                .and(services::Column::ServiceId.eq(service_id.into_inner())),
-        )
+        .filter(services::Column::ServiceId.eq(service_id.into_inner()))
         .all(&data.db)
         .await?;
 
