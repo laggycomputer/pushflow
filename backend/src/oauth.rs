@@ -225,7 +225,7 @@ pub(crate) mod cb {
             .insert(
                 "user",
                 SessionUser {
-                    user_id: user.user_id.to_string(),
+                    user_id: user.user_id,
                     avatar: user.picture,
                 },
             )

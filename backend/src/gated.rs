@@ -7,6 +7,7 @@ use futures_util::future::LocalBoxFuture;
 use serde::{Deserialize, Serialize};
 use std::future::{Ready, ready};
 use std::task::{Context, Poll};
+use uuid::Uuid;
 
 pub struct RequireAuthBuilder;
 
@@ -62,7 +63,7 @@ where
 
 #[derive(Serialize, Deserialize)]
 pub(crate) struct SessionUser {
-    pub user_id: String,
+    pub user_id: Uuid,
     pub avatar: Option<String>,
 }
 
