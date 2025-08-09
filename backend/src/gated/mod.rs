@@ -1,3 +1,5 @@
+pub(crate) mod service;
+
 use actix_session::{Session, SessionExt};
 use actix_web::body::EitherBody;
 use actix_web::dev::{Service, ServiceRequest, ServiceResponse, Transform};

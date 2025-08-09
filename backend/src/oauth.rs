@@ -22,18 +22,16 @@ struct GoogleOAuthJWT {
 
 pub(crate) mod start {
     use super::*;
-    use crate::AppData;
+    use crate::ExtractedAppData;
     use actix_web::cookie::time::UtcDateTime;
     use actix_web::cookie::{Cookie, SameSite};
-    use actix_web::{HttpRequest, HttpResponse, Responder, cookie, get};
+    use actix_web::{cookie, get, HttpResponse, Responder};
     use anyhow::Context;
     use jsonwebtoken::Header;
     use std::ops::Add;
 
     #[get("/goog")]
-    async fn goog(req: HttpRequest) -> crate::Result<impl Responder> {
-        let data = *req.app_data::<&AppData>().unwrap();
-
+    async fn goog(data: ExtractedAppData) -> crate::Result<impl Responder> {
         let state = uuid::Uuid::new_v4();
 
         let redirect_uri = format!("{}/api/login/google", data.oauth.frontend_url);
@@ -74,15 +72,15 @@ pub(crate) mod start {
 }
 
 pub(crate) mod cb {
-    use crate::AppData;
     use crate::gated::SessionUser;
+    use crate::ExtractedAppData;
     use actix_session::Session;
     use actix_web::http::StatusCode;
-    use actix_web::{HttpRequest, HttpResponse, Responder, get};
+    use actix_web::{get, web, HttpRequest, HttpResponse, Responder};
     use anyhow::Context;
     use entity::users;
     use jsonwebtoken::Validation;
-    use sea_orm::{ActiveValue, EntityTrait, sea_query};
+    use sea_orm::{sea_query, ActiveValue, EntityTrait};
     use serde::{Deserialize, Serialize};
     use uuid::Uuid;
 
@@ -125,12 +123,11 @@ pub(crate) mod cb {
 
     #[get("/goog")]
     async fn goog(
-        info: actix_web::web::Query<OAuthCbGoogQuery>,
+        info: web::Query<OAuthCbGoogQuery>,
+        data: ExtractedAppData,
         session: Session,
         req: HttpRequest,
     ) -> crate::Result<impl Responder> {
-        let data = *req.app_data::<&AppData>().unwrap();
-
         // client has their "correct state" in the signed cookie
         let cookie_value = match req.cookie("oauth_state") {
             None => return Ok(HttpResponse::build(StatusCode::BAD_REQUEST).body("no state")),

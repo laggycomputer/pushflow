@@ -3,11 +3,11 @@ mod oauth;
 
 use crate::gated::RequireAuthBuilder;
 use crate::oauth::{GoogleOAuthConfig, OAuth};
-use actix_session::SessionMiddleware;
 use actix_session::storage::RedisSessionStore;
-use actix_web::Responder;
+use actix_session::SessionMiddleware;
 use actix_web::cookie::Key;
-use actix_web::{App, HttpServer, ResponseError, get, web};
+use actix_web::Responder;
+use actix_web::{get, web, App, HttpServer, ResponseError};
 use anyhow::Context;
 use deadpool_redis::{Config, Runtime};
 use migration::{Migrator, MigratorTrait};
@@ -54,6 +54,8 @@ struct AppData {
     db: sea_orm::DatabaseConnection,
 }
 
+type ExtractedAppData = web::Data<AppData>;
+
 #[get("/ping")]
 async fn ping() -> impl Responder {
     "pong"
@@ -87,7 +89,7 @@ async fn main() -> anyhow::Result<()> {
     .await
     .with_context(|| format!("connect to redis at {redis_url}"))?;
 
-    let app_data = &*Box::leak::<'static>(Box::new(AppData {
+    let app_data = AppData {
         client: reqwest::Client::new(),
         oauth: OAuth {
             frontend_url: std::env::var("FRONTEND_URL").context("need env var FRONTEND_URL")?,
@@ -103,7 +105,7 @@ async fn main() -> anyhow::Result<()> {
             jsonwebtoken::DecodingKey::from_secret(jwt_secret.as_encoded_bytes()),
         ),
         db,
-    }));
+    };
 
     let server = {
         HttpServer::new(move || {
@@ -118,19 +120,17 @@ async fn main() -> anyhow::Result<()> {
             .build();
 
             App::new()
-                .app_data(app_data)
+                .app_data(web::Data::new(app_data.clone()))
                 .wrap(session_middle)
                 .service(ping)
                 .service(web::scope("/oauth/start").service(oauth::start::goog))
-                .service(
-                    web::scope("/oauth/cb")
-                        .service(oauth::cb::goog),
-                )
+                .service(web::scope("/oauth/cb").service(oauth::cb::goog))
                 .service(
                     web::scope("/gated")
                         .wrap(RequireAuthBuilder)
                         .service(gated::me)
-                        .service(gated::logout),
+                        .service(gated::logout)
+                        .service(web::scope("/service").service(gated::service::service)),
                 )
         })
         .bind(("0.0.0.0", port))
