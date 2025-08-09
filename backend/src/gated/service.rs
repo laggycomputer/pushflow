@@ -1,7 +1,7 @@
 use crate::gated::SessionUser;
 use crate::ExtractedAppData;
 use actix_session::Session;
-use actix_web::{get, post, web, Responder};
+use actix_web::{get, post, web, HttpResponse, Responder};
 use anyhow::Context;
 use entity::services;
 use sea_orm::ColumnTrait;
@@ -27,6 +27,11 @@ impl Into<ReturnedService> for services::Model {
     }
 }
 
+#[derive(Deserialize, Debug)]
+pub struct PostServiceQuery {
+    name: String,
+}
+
 #[get("")]
 async fn get_service(data: ExtractedAppData, session: Session) -> crate::Result<impl Responder> {
     let session_user = session
@@ -44,11 +49,6 @@ async fn get_service(data: ExtractedAppData, session: Session) -> crate::Result<
             .map(|m| m.into())
             .collect::<Vec<ReturnedService>>(),
     ))
-}
-
-#[derive(Deserialize, Debug)]
-pub struct PostServiceQuery {
-    name: String,
 }
 
 #[post("")]
@@ -79,4 +79,29 @@ async fn post_service(
         .context("insert new service")?;
 
     Ok(web::Json::<ReturnedService>(returned_ent.into()))
+}
+
+#[get("/{service_id}")]
+async fn get_one_service(
+    data: ExtractedAppData,
+    session: Session,
+    service_id: web::Path<Uuid>,
+) -> crate::Result<impl Responder> {
+    let session_user = session
+        .get::<SessionUser>("user")?
+        .context("no session user")?;
+
+    let service_by_id_and_owned = services::Entity::find()
+        .filter(
+            services::Column::OwnerId
+                .eq(session_user.user_id)
+                .and(services::Column::ServiceId.eq(service_id.into_inner())),
+        )
+        .all(&data.db)
+        .await?;
+
+    Ok(match service_by_id_and_owned.first() {
+        None => web::Either::Left(HttpResponse::NotFound()),
+        Some(service) => web::Either::Right(web::Json::<ReturnedService>(service.clone().into())),
+    })
 }

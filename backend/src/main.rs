@@ -131,8 +131,9 @@ async fn main() -> anyhow::Result<()> {
                         .service(gated::me)
                         .service(gated::logout)
                         .service(web::scope("/service")
-                            .service(gated::service::get_service)
                             .service(gated::service::post_service)
+                            .service(gated::service::get_service)
+                            .service(gated::service::get_one_service)
                         ),
                 )
         })
