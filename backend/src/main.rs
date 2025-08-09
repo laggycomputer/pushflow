@@ -119,16 +119,15 @@ async fn main() -> anyhow::Result<()> {
 
             App::new()
                 .app_data(app_data)
+                .wrap(session_middle)
                 .service(ping)
                 .service(web::scope("/oauth/start").service(oauth::start::goog))
                 .service(
                     web::scope("/oauth/cb")
-                        .wrap(session_middle.clone())
                         .service(oauth::cb::goog),
                 )
                 .service(
                     web::scope("/gated")
-                        .wrap(session_middle.clone())
                         .wrap(RequireAuthBuilder)
                         .service(gated::check_auth)
                         .service(gated::logout),
