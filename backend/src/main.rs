@@ -123,8 +123,8 @@ async fn main() -> anyhow::Result<()> {
                 .service(web::scope("/oauth/start").service(oauth::start::goog))
                 .service(
                     web::scope("/oauth/cb")
-                        .service(oauth::cb::goog)
-                        .wrap(session_middle.clone()),
+                        .wrap(session_middle.clone())
+                        .service(oauth::cb::goog),
                 )
                 .service(
                     web::scope("/gated")
