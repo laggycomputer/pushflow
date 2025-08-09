@@ -1,12 +1,12 @@
 use actix_session::{Session, SessionExt};
+use actix_web::body::EitherBody;
 use actix_web::dev::{Service, ServiceRequest, ServiceResponse, Transform};
 use actix_web::http::StatusCode;
-use actix_web::{get, HttpResponse, Responder};
+use actix_web::{HttpResponse, Responder, get};
 use futures_util::future::LocalBoxFuture;
 use serde::{Deserialize, Serialize};
-use std::future::{ready, Ready};
+use std::future::{Ready, ready};
 use std::task::{Context, Poll};
-use actix_web::body::EitherBody;
 
 pub struct RequireAuthBuilder;
 
