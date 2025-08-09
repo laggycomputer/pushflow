@@ -1,3 +1,5 @@
+pub(crate) mod group;
+
 use crate::ExtractedAppData;
 use crate::gated::SessionUser;
 use actix_session::Session;
@@ -81,8 +83,8 @@ async fn post_service(
     Ok(web::Json::<ReturnedService>(returned_ent.into()))
 }
 
-#[get("/{service_id}")]
-async fn get_one_service(
+#[get("")]
+pub async fn get_one_service(
     data: ExtractedAppData,
     session: Session,
     service_id: web::Path<Uuid>,
