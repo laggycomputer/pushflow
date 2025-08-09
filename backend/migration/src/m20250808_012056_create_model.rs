@@ -113,7 +113,7 @@ impl MigrationTrait for Migration {
                         .to_owned(),
                 )
                 .await?;
-            
+
             manager
                 .create_foreign_key(
                     ForeignKey::create()

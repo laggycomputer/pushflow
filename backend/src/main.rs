@@ -1,7 +1,7 @@
 mod gated;
 mod oauth;
 
-use gated::middleware::RequireAuthBuilder;
+use crate::gated::middleware::OwnsServiceBuilder;
 use crate::oauth::{GoogleOAuthConfig, OAuth};
 use actix_session::SessionMiddleware;
 use actix_session::storage::RedisSessionStore;
@@ -10,10 +10,10 @@ use actix_web::cookie::Key;
 use actix_web::{App, HttpServer, ResponseError, get, web};
 use anyhow::Context;
 use deadpool_redis::{Config, Runtime};
+use gated::middleware::RequireAuthBuilder;
 use migration::{Migrator, MigratorTrait};
 use std::ffi::OsString;
 use std::fmt::{Display, Formatter};
-use crate::gated::middleware::OwnsServiceBuilder;
 
 const FIXED_SESSION_KEY: [u8; 64] = [
     0xe9, 0xde, 0x52, 0x01, 0x07, 0xd0, 0xf9, 0x16, 0xe3, 0x9a, 0x52, 0x39, 0x24, 0x68, 0xfd, 0xec,
@@ -135,10 +135,12 @@ async fn main() -> anyhow::Result<()> {
                             web::scope("/service")
                                 .service(gated::service::post_service)
                                 .service(gated::service::get_service)
-                                .service(web::scope("/{service_id}")
-                                    .wrap(OwnsServiceBuilder)
-                                    .service(gated::service::get_one_service)
-                                    .service(gated::service::group::post_group))
+                                .service(
+                                    web::scope("/{service_id}")
+                                        .wrap(OwnsServiceBuilder)
+                                        .service(gated::service::get_one_service)
+                                        .service(gated::service::group::post_group),
+                                ),
                         ),
                 )
         })

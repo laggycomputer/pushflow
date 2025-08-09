@@ -1,6 +1,6 @@
 use crate::ExtractedAppData;
 use actix_session::Session;
-use actix_web::{post, web, Responder};
+use actix_web::{Responder, post, web};
 use uuid::Uuid;
 
 #[post("/group")]

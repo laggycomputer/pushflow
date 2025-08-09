@@ -1,9 +1,9 @@
-pub(crate) mod service;
 pub(crate) mod middleware;
+pub(crate) mod service;
 
-use actix_session::{Session};
+use actix_session::Session;
 use actix_web::http::StatusCode;
-use actix_web::{get, HttpResponse, Responder};
+use actix_web::{HttpResponse, Responder, get};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 

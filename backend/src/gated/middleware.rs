@@ -1,16 +1,16 @@
-use crate::gated::SessionUser;
 use crate::ExtractedAppData;
+use crate::gated::SessionUser;
 use actix_session::SessionExt;
+use actix_web::HttpResponse;
 use actix_web::body::EitherBody;
 use actix_web::dev::{Service, ServiceRequest, ServiceResponse, Transform};
 use actix_web::http::StatusCode;
-use actix_web::HttpResponse;
 use entity::services;
 use futures_util::future::LocalBoxFuture;
 use sea_orm::ColumnTrait;
 use sea_orm::EntityTrait;
 use sea_orm::{PaginatorTrait, QueryFilter};
-use std::future::{ready, Ready};
+use std::future::{Ready, ready};
 use std::rc::Rc;
 use std::str::FromStr;
 use std::task::{Context, Poll};
@@ -23,9 +23,7 @@ fn bounce_no_auth<B>(req: ServiceRequest) -> ServiceResponse<EitherBody<&'static
 }
 
 fn bounce_ambiguous<B>(req: ServiceRequest) -> ServiceResponse<EitherBody<&'static str, B>> {
-    req.into_response(
-        HttpResponse::with_body(StatusCode::NOT_FOUND, "bad id").map_into_left_body(),
-    )
+    req.into_response(HttpResponse::with_body(StatusCode::NOT_FOUND, "bad id").map_into_left_body())
 }
 
 pub struct RequireAuthBuilder;
@@ -48,7 +46,7 @@ where
 }
 
 pub struct RequireAuthMiddleware<S> {
-    service : S,
+    service: S,
 }
 
 impl<S, B> Service<ServiceRequest> for RequireAuthMiddleware<S>

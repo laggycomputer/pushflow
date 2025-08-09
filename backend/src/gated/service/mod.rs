@@ -1,10 +1,10 @@
 pub(crate) mod group;
 
-use crate::gated::SessionUser;
 use crate::ExtractedAppData;
+use crate::gated::SessionUser;
 use actix_session::Session;
 use actix_web::http::StatusCode;
-use actix_web::{get, post, web, Either, HttpResponse, Responder};
+use actix_web::{Either, HttpResponse, Responder, get, post, web};
 use anyhow::Context;
 use entity::services;
 use sea_orm::EntityTrait;
@@ -103,7 +103,7 @@ pub async fn get_one_service(
         .await?;
 
     Ok(match service_by_id_and_owned.first() {
-        None => web::Either::Left(HttpResponse::NotFound()),
+        None => Either::Left(HttpResponse::NotFound()),
         Some(service) => web::Either::Right(web::Json::<ReturnedService>(service.clone().into())),
     })
 }
