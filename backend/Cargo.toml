@@ -22,6 +22,7 @@ actix-session = { version = "0.10.1", features = ["redis-session", "redis-pool"]
 # this silently has to match actix-session
 deadpool-redis = "0.16.0"
 futures-util = "0.3.31"
+vapid = "0.6.0"
 
 [profile.release]
 lto = "fat"
