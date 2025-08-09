@@ -2575,6 +2575,7 @@ dependencies = [
  "deadpool-redis",
  "dotenv",
  "entity",
+ "futures-util",
  "jsonwebtoken",
  "migration",
  "reqwest",

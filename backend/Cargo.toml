@@ -21,6 +21,7 @@ migration = { path = "migration" }
 actix-session = { version = "0.10.1", features = ["redis-session", "redis-pool"] }
 # this silently has to match actix-session
 deadpool-redis = "0.16.0"
+futures-util = "0.3.31"
 
 [profile.release]
 lto = "fat"

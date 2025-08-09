@@ -1,12 +1,13 @@
 mod gated;
 mod oauth;
 
+use crate::gated::RequireAuthBuilder;
 use crate::oauth::{GoogleOAuthConfig, OAuth};
-use actix_session::SessionMiddleware;
 use actix_session::storage::RedisSessionStore;
-use actix_web::Responder;
+use actix_session::SessionMiddleware;
 use actix_web::cookie::Key;
-use actix_web::{App, HttpServer, ResponseError, get, web};
+use actix_web::Responder;
+use actix_web::{get, web, App, HttpServer, ResponseError};
 use anyhow::Context;
 use deadpool_redis::{Config, Runtime};
 use migration::{Migrator, MigratorTrait};
@@ -127,9 +128,10 @@ async fn main() -> anyhow::Result<()> {
                 )
                 .service(
                     web::scope("/gated")
+                        .wrap(session_middle.clone())
+                        .wrap(RequireAuthBuilder)
                         .service(gated::check_auth)
-                        .service(gated::logout)
-                        .wrap(session_middle.clone()),
+                        .service(gated::logout),
                 )
         })
         .bind(("0.0.0.0", port))
