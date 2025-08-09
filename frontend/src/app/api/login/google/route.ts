@@ -7,7 +7,7 @@ export async function GET (request: NextRequest) {
   const oauthState = cookieStore.get('oauth_state')
   if (!oauthState) return NextResponse.json(null, { status: 400 })
 
-  const url = `${config.BACKEND_BASE_URL}/oauth/cb/goog${request.nextUrl.search}`
+  const url = `${config.BACKEND_URL}/oauth/cb/goog${request.nextUrl.search}`
   const headers = { Cookie: oauthState.value }
   const oauthResponse = await fetch(url, { headers })
 
