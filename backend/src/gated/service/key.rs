@@ -128,6 +128,8 @@ async fn post_key(
                     .insert(txn)
                     .await?;
 
+                // TODO: throw CONFLICT on name unique cons violation
+
                 let scopes = body
                     .scopes
                     .into_iter()
