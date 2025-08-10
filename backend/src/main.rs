@@ -1,5 +1,6 @@
 mod gated;
 mod oauth;
+mod util;
 
 use crate::gated::middleware::OwnsServiceBuilder;
 use crate::oauth::{GoogleOAuthConfig, OAuth};
