@@ -1,16 +1,15 @@
 pub(crate) mod group;
 pub(crate) mod key;
 
-use crate::ExtractedAppData;
 use crate::gated::SessionUser;
+use crate::ExtractedAppData;
 use actix_session::Session;
-use actix_web::http::StatusCode;
-use actix_web::{Either, HttpResponse, Responder, get, post, web};
+use actix_web::{get, post, web, Either, HttpResponse, Responder};
 use anyhow::Context;
 use entity::services;
 use sea_orm::EntityTrait;
 use sea_orm::QueryFilter;
-use sea_orm::{ColumnTrait, SqlErr};
+use sea_orm::ColumnTrait;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -77,20 +76,12 @@ async fn post_service(
         vapid_private: sea_orm::Set(vapid.to_private_raw()),
     };
 
-    let returned_ent = match services::Entity::insert(insert_ent)
+    let returned_ent = services::Entity::insert(insert_ent)
         .exec_with_returning(&data.db)
         .await
-    {
-        Ok(ent) => ent,
-        Err(e) if matches!(e.sql_err(), Some(SqlErr::UniqueConstraintViolation(_))) => {
-            return Ok(Either::Left(("dup name", StatusCode::BAD_REQUEST)));
-        }
-        Err(e) => return Err(e).context("insert new service")?,
-    };
+        .context("insert new service")?;
 
-    Ok(Either::Right(web::Json::<ReturnedService>(
-        returned_ent.into(),
-    )))
+    Ok(web::Json::<ReturnedService>(returned_ent.into()))
 }
 
 #[get("")]
