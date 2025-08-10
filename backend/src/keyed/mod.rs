@@ -167,7 +167,8 @@ async fn notify(
     let svc = services::Entity::find_by_id(service_id.clone())
         .one(&data.db)
         .await
-        .context("get service by id")?.context("no service by id")?;
+        .context("get service by id")?
+        .context("no service by id")?;
 
     let mut it = group_subscribers::Entity::find()
         .filter(
@@ -179,7 +180,7 @@ async fn notify(
         .paginate(&data.db, 1_000);
 
     let content_bytes = body.payload.as_bytes();
-
+    let client = IsahcWebPushClient::new().context("construct push client")?;
 
     while let Some(ch) = it
         .fetch_and_next()
@@ -210,8 +211,10 @@ async fn notify(
 
             // TODO: topic, urgency
 
-            let client = IsahcWebPushClient::new()?;
-            if let Err(_) = client.send(builder.build()?).await {
+            if let Err(_) = client
+                .send(builder.build().context("build push message")?)
+                .await
+            {
                 // unsub
             }
         }
