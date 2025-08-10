@@ -26,8 +26,8 @@ impl From<KeyScope> for KeyScope2 {
 #[derive(Serialize)]
 struct ReturnedApiKeyScope {
     pub service_id: Uuid,
-    pub group_id: Uuid,
-    pub scope: Option<KeyScope2>,
+    pub group_id: Option<Uuid>,
+    pub scope: KeyScope2,
 }
 
 impl From<api_key_scopes::Model> for ReturnedApiKeyScope {
@@ -35,7 +35,7 @@ impl From<api_key_scopes::Model> for ReturnedApiKeyScope {
         ReturnedApiKeyScope {
             service_id: val.service_id,
             group_id: val.group_id,
-            scope: val.scope.map(|s| s.into()),
+            scope: val.scope.into(),
         }
     }
 }
