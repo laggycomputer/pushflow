@@ -55,11 +55,16 @@ struct ReturnedApiKey {
     scopes: Vec<ReturnedApiKeyScope>,
 }
 
-impl From<(api_keys::Model, Vec<api_key_scopes::Model>)> for ReturnedApiKey {
-    fn from(val: (api_keys::Model, Vec<api_key_scopes::Model>)) -> Self {
+impl ReturnedApiKey {
+    fn new(val: (api_keys::Model, Vec<api_key_scopes::Model>), trunc_key: bool) -> Self {
+        let mut key_id = val.0.key_id.to_string();
+
         ReturnedApiKey {
             service_id: val.0.service_id,
-            key_preview: val.0.key_id.to_string().split_off(24),
+            key_preview: match trunc_key {
+                true => key_id,
+                false => key_id.split_off(24)
+            },
             last_used: val.0.last_used,
             scopes: val.1.into_iter().map(|x| x.into()).collect(),
         }
@@ -81,8 +86,8 @@ async fn get_all_keys(
     Ok(web::Json(
         groups
             .into_iter()
-            .map(|m| m.into())
-            .collect::<Vec<ReturnedApiKey>>(),
+            .map(|m| ReturnedApiKey::new(m, true))
+            .collect::<Vec<_>>(),
     ))
 }
 
@@ -120,8 +125,8 @@ async fn post_key(
                     name: ActiveValue::Set(body.name),
                     last_used: Default::default(),
                 }
-                .insert(txn)
-                .await?;
+                    .insert(txn)
+                    .await?;
 
                 let scopes = body
                     .scopes
@@ -154,7 +159,7 @@ async fn post_key(
     Ok(web::Json(
         groups
             .into_iter()
-            .map(|m| m.into())
-            .collect::<Vec<ReturnedApiKey>>(),
+            .map(|m| ReturnedApiKey::new(m, false))
+            .collect::<Vec<_>>(),
     ))
 }
