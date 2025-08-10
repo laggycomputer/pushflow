@@ -50,7 +50,7 @@ async fn get_all_groups(
 }
 
 #[derive(Deserialize, Debug)]
-pub struct PostGroupQuery {
+pub struct PostGroupBody {
     name: String,
 }
 
@@ -58,14 +58,14 @@ pub struct PostGroupQuery {
 async fn post_group(
     data: ExtractedAppData,
     service_id: web::Path<Uuid>,
-    query: web::Query<PostGroupQuery>,
+    body: web::Json<PostGroupBody>,
 ) -> crate::Result<impl Responder> {
     let group_id = Uuid::now_v7();
 
     let insert_ent = groups::ActiveModel {
         service_id: ActiveValue::set(service_id.into_inner()),
         group_id: ActiveValue::set(group_id),
-        name: ActiveValue::set(query.into_inner().name),
+        name: ActiveValue::set(body.into_inner().name),
         last_notified: Default::default(),
     };
 

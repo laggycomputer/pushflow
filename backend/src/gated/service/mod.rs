@@ -51,7 +51,7 @@ async fn get_service(data: ExtractedAppData, session: Session) -> crate::Result<
 }
 
 #[derive(Deserialize, Debug)]
-pub struct PostServiceQuery {
+pub struct PostServiceBody {
     name: String,
 }
 
@@ -59,7 +59,7 @@ pub struct PostServiceQuery {
 async fn post_service(
     data: ExtractedAppData,
     session: Session,
-    query: web::Query<PostServiceQuery>,
+    body: web::Json<PostServiceBody>,
 ) -> crate::Result<impl Responder> {
     let session_user = session
         .get::<SessionUser>("user")?
@@ -72,7 +72,7 @@ async fn post_service(
     let insert_ent = services::ActiveModel {
         service_id: sea_orm::Set(service_id),
         owner_id: sea_orm::Set(session_user.user_id),
-        name: sea_orm::Set(query.name.clone()),
+        name: sea_orm::Set(body.name.clone()),
         vapid_public: sea_orm::Set(vapid.to_public_raw()),
         vapid_private: sea_orm::Set(vapid.to_private_raw()),
     };
