@@ -25,6 +25,7 @@ futures-util = "0.3.31"
 vapid = "0.6.0"
 actix-web-httpauth = "0.8.2"
 serde_json = "1.0.142"
+web-push = "0.11.0"
 
 [profile.release]
 lto = "fat"

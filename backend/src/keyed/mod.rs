@@ -1,16 +1,22 @@
+mod middleware;
+
 use crate::{AnyhowBridge, ExtractedAppData};
 use actix_web::http::StatusCode;
 use actix_web::{post, web, Either, Responder};
 use actix_web_httpauth::extractors::bearer::BearerAuth;
 use anyhow::Context;
 use entity::sea_orm_active_enums::KeyScope;
-use entity::{api_key_scopes, group_subscribers, subscribers};
+use entity::{api_key_scopes, group_subscribers, services, subscribers};
 use migration::sea_query;
 use sea_orm::{ActiveValue, PaginatorTrait};
 use sea_orm::{ColumnTrait, TransactionTrait};
 use sea_orm::{EntityTrait, QueryFilter};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use web_push::{
+    IsahcWebPushClient, SubscriptionInfo, VapidSignatureBuilder, WebPushClient,
+    WebPushMessageBuilder,
+};
 
 #[derive(Serialize, Deserialize, Debug)]
 struct PostSubscribeBodyKeys {
@@ -106,7 +112,10 @@ async fn subscribe(
                     service_id: ActiveValue::Set(service_id),
                     group_id: ActiveValue::Set(group_id),
                     subscriber_id: ActiveValue::set(sub_id),
-                }).on_conflict_do_nothing().exec(txn).await?;
+                })
+                .on_conflict_do_nothing()
+                .exec(txn)
+                .await?;
 
                 Ok(())
             })
@@ -114,4 +123,99 @@ async fn subscribe(
         .await?;
 
     Ok(Either::Right("subscribe someone"))
+}
+
+#[derive(Deserialize)]
+pub struct PostNotifyBody {
+    payload: String,
+}
+
+#[post("/service/{service_id}/group/{group_id}/notify")]
+async fn notify(
+    data: ExtractedAppData,
+    auth: BearerAuth,
+    params: web::Path<(Uuid, Uuid)>,
+    body: web::Json<PostNotifyBody>,
+) -> crate::Result<impl Responder> {
+    let Ok(auth) = auth.token().parse::<Uuid>() else {
+        return Ok(Either::Left(("what", StatusCode::NOT_FOUND)));
+    };
+
+    let (service_id, group_id) = params.into_inner();
+    let body = body.into_inner();
+
+    let count = api_key_scopes::Entity::find()
+        .filter(
+            api_key_scopes::Column::KeyId
+                .eq(auth)
+                .and(api_key_scopes::Column::ServiceId.eq(service_id))
+                .and(
+                    api_key_scopes::Column::GroupId
+                        .eq(group_id)
+                        .or(api_key_scopes::Column::GroupId.is_null()),
+                )
+                .and(api_key_scopes::Column::Scope.eq(KeyScope::Notify)),
+        )
+        .count(&data.db)
+        .await?;
+
+    if count == 0 {
+        // disguise this
+        return Ok(Either::Left(("what", StatusCode::NOT_FOUND)));
+    }
+
+    let svc = services::Entity::find_by_id(service_id.clone())
+        .one(&data.db)
+        .await
+        .context("get service by id")??;
+
+    let mut it = group_subscribers::Entity::find()
+        .filter(
+            group_subscribers::Column::ServiceId
+                .eq(service_id)
+                .and(group_subscribers::Column::GroupId.eq(group_id)),
+        )
+        .find_also_related(subscribers::Entity)
+        .paginate(&data.db, 1_000);
+
+    let content_bytes = body.payload.as_bytes();
+
+
+    while let Some(ch) = it
+        .fetch_and_next()
+        .await
+        .context("next page of subscribers")?
+    {
+        for sub in ch {
+            let (_, Some(sub)) = sub else {
+                continue;
+            };
+
+            let Ok(keys) = serde_json::from_str::<PostSubscribeBodyKeys>(&sub.client_key) else {
+                continue;
+            };
+
+            let subscription_info = SubscriptionInfo::new(sub.endpoint, keys.p256dh, keys.auth);
+
+            let mut sig_builder =
+                VapidSignatureBuilder::from_base64(&svc.vapid_private, &subscription_info)
+                    .context("make sig builder")?
+                    .build()
+                    .context("build sig")?;
+
+            let mut builder = WebPushMessageBuilder::new(&subscription_info);
+
+            builder.set_payload(web_push::ContentEncoding::Aes128Gcm, content_bytes);
+            builder.set_vapid_signature(sig_builder);
+
+            // TODO: topic, urgency
+
+            let client = IsahcWebPushClient::new()?;
+            if let Err(_) = client.send(builder.build()?).await {
+                // unsub
+            }
+        }
+    }
+
+    Ok(Either::Right("ok"))
 }
