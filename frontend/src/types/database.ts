@@ -25,6 +25,7 @@ export interface ServiceGroup {
   group_id: string;
   last_notified: string;
   created_at: string;
+  name: string;
 }
 
 export interface ServiceApiKey {

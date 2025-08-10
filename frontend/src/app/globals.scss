@@ -83,8 +83,13 @@ a {
   font-size: 20px;
 }
 
+.MuiDialog-root .MuiDialog-paper {
+  background: none;
+}
+
 .MuiDialog-root .card-outer {
   min-width: min(480px, calc(100vw - 64px));
+  backdrop-filter: blur(4px) brightness(0.8);
 
   .card-inner {
     padding: 16px 20px;
