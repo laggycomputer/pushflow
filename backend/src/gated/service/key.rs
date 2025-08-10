@@ -111,7 +111,7 @@ async fn post_key(
         .db
         .transaction::<_, Uuid, DbErr>(move |txn| {
             Box::pin(async move {
-                let key_id = Uuid::now_v7();
+                let key_id = Uuid::new_v4();
 
                 let new_key = api_keys::ActiveModel {
                     service_id: ActiveValue::set(service_id),
