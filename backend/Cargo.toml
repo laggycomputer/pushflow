@@ -23,6 +23,7 @@ actix-session = { version = "0.10.1", features = ["redis-session", "redis-pool"]
 deadpool-redis = "0.16.0"
 futures-util = "0.3.31"
 vapid = "0.6.0"
+actix-web-httpauth = "0.8.2"
 
 [profile.release]
 lto = "fat"

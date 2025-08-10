@@ -5,9 +5,9 @@ use entity::api_key_scopes;
 use entity::api_keys;
 use entity::sea_orm_active_enums::KeyScope;
 use sea_orm::prelude::DateTime;
+use sea_orm::EntityTrait;
 use sea_orm::QueryFilter;
 use sea_orm::{ActiveModelTrait, ActiveValue, ColumnTrait, DbErr, TransactionTrait};
-use sea_orm::EntityTrait;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -89,7 +89,8 @@ async fn get_all_keys(
 #[derive(Deserialize)]
 struct SentApiKeyScope {
     group: Option<Uuid>,
-    scope: KeyScope2,
+    #[serde(with = "crate::util::active_enum")]
+    scope: KeyScope,
 }
 
 #[derive(Deserialize)]
@@ -113,19 +114,20 @@ async fn post_key(
             Box::pin(async move {
                 let key_id = Uuid::new_v4();
 
-                let new_key = api_keys::ActiveModel {
+                api_keys::ActiveModel {
                     service_id: ActiveValue::set(service_id),
                     key_id: ActiveValue::Set(key_id),
                     name: ActiveValue::Set(body.name),
                     last_used: Default::default(),
-                };
-                new_key.clone().save(txn).await?;
+                }
+                .insert(txn)
+                .await?;
 
                 let scopes = body
                     .scopes
                     .into_iter()
                     .map(|scope| api_key_scopes::ActiveModel {
-                        scope_id: Default::default(),
+                        scope_id: ActiveValue::set(Uuid::new_v4()),
                         key_id: ActiveValue::set(key_id),
                         service_id: ActiveValue::set(service_id),
                         group_id: ActiveValue::set(scope.group),
