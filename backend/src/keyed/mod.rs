@@ -155,7 +155,7 @@ async fn subscribe(
         })
         .await?;
 
-    Ok(Either::Right("subscribe someone"))
+    Ok(Either::Right("ok"))
 }
 
 #[derive(Deserialize)]
