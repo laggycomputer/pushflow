@@ -12,20 +12,20 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[derive(Serialize, Deserialize)]
-struct KeyScope2 {
+struct KeyScope2 (
     #[serde(with = "crate::util::active_enum")]
-    inner: KeyScope,
-}
+    KeyScope,
+);
 
 impl From<KeyScope> for KeyScope2 {
     fn from(val: KeyScope) -> Self {
-        KeyScope2 { inner: val }
+        KeyScope2 (val)
     }
 }
 
 impl From<KeyScope2> for KeyScope {
     fn from(value: KeyScope2) -> Self {
-        value.inner
+        value.0
     }
 }
 
