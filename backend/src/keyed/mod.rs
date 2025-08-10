@@ -8,6 +8,7 @@ use anyhow::Context;
 use entity::sea_orm_active_enums::KeyScope;
 use entity::{api_key_scopes, group_subscribers, services, subscribers};
 use migration::sea_query;
+use sea_orm::sea_query::OnConflict;
 use sea_orm::{ActiveValue, PaginatorTrait};
 use sea_orm::{ColumnTrait, TransactionTrait};
 use sea_orm::{EntityTrait, QueryFilter};
