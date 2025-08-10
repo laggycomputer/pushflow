@@ -140,7 +140,8 @@ async fn main() -> anyhow::Result<()> {
                                     web::scope("/{service_id}")
                                         .wrap(OwnsServiceBuilder)
                                         .service(gated::service::get_one_service)
-                                        .service(gated::service::group::post_group),
+                                        .service(gated::service::group::get_all_groups)
+                                        .service(gated::service::group::post_group)
                                 ),
                         ),
                 )
