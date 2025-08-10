@@ -145,6 +145,7 @@ async fn post_key(
                     .collect::<Vec<_>>();
 
                 api_key_scopes::Entity::insert_many(scopes)
+                    .on_conflict_do_nothing()
                     .exec(txn)
                     .await?;
 
