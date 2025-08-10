@@ -120,6 +120,12 @@ impl MigrationTrait for Migration {
                         .primary_key(
                             Index::create()
                                 .col(GroupSubscribers::ServiceId)
+                                .col(GroupSubscribers::GroupId)
+                                .col(GroupSubscribers::SubscriberId),
+                        )
+                        .index(
+                            Index::create()
+                                .col(GroupSubscribers::ServiceId)
                                 .col(GroupSubscribers::GroupId),
                         )
                         .to_owned(),
