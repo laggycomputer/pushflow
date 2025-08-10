@@ -1,3 +1,4 @@
+'use client';
 import Card, { CardHeader } from "@/app/components/Card";
 import DataList from "@/app/components/DataList";
 import Group from "@/app/components/ServiceGroup";
@@ -6,16 +7,32 @@ import { IconButton } from "@mui/material";
 
 import AddIcon from "@mui/icons-material/Add";
 import { pluralize } from "@/helpers/util";
-import { getServiceGroups } from "@/helpers/service";
+import CreateGroupDialog from "@/app/components/dialogs/CreateGroupDialog";
+import { setActiveDialog } from "@/store/slices/dialogSlice";
+import { DialogName } from "@/helpers/dialog";
+import { useAppDispatch } from "@/store/hooks";
+import { useState } from "react";
 
-export default async function ServiceGroupList ({ serviceId }: { serviceId: string; }) {
-  const groups: ServiceGroup[] = await getServiceGroups(serviceId).then(x => x ?? [])
+interface ServiceGroupListProps {
+  serviceId: string;
+  groups: ServiceGroup[];
+}
+export default function ServiceGroupList ({ serviceId, groups }: ServiceGroupListProps) {
+  const dispatch = useAppDispatch()
 
+  /** @todo put in redux store */
+  const [storedGroups, setStoredGroups] = useState(groups)
+
+  const openCreateGroupDialog = () => dispatch(setActiveDialog(DialogName.NewServiceGroupPopup))
+  const handleNewGroup = (group: ServiceGroup) => {
+    setStoredGroups([...storedGroups, group])
+  }
+  
   const groupHeaderText = pluralize(groups.length + 1, 'Groups', 'Group')
 
   return <Card>
     <CardHeader text={groupHeaderText}>
-      <IconButton size="small">
+      <IconButton size="small" onClick={openCreateGroupDialog}>
         <AddIcon />
       </IconButton>
     </CardHeader>
@@ -25,12 +42,13 @@ export default async function ServiceGroupList ({ serviceId }: { serviceId: stri
         lastNotified={new Date()}
         isService
       />
-      {groups.map(g => <Group
+      {storedGroups.map(g => <Group
         key={g.group_id}
-        name={"Test Group Name"}
+        name={g.name}
         userCount={2}
         lastNotified={new Date()}
       />)}
     </DataList>
+    <CreateGroupDialog serviceId={serviceId} onCreate={handleNewGroup} />
   </Card>
 }

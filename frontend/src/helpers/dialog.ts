@@ -1,3 +1,4 @@
 export enum DialogName {
-  NewServicePopup = 'new-service'
+  NewServicePopup = 'new-service',
+  NewServiceGroupPopup = 'new-service-group'
 }

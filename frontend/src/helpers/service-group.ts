@@ -1,0 +1,18 @@
+'use server';
+import config from "@/env";
+import { getSessionHeaders } from "./server";
+import { ServiceGroup } from "@/types";
+
+export async function createGroup (serviceId: string, name: string): Promise<ServiceGroup | null> {
+  const headers = await getSessionHeaders()
+  if (!headers) return null
+
+  headers['Content-Type'] = 'application/json'
+
+  const url = `${config.BACKEND_URL}/gated/service/${serviceId}/group`
+  const body = JSON.stringify({ name })
+
+  return await fetch(url, { headers, method: 'POST', body })
+    .then(x => x.json())
+    .catch(err => console.error(err))
+}

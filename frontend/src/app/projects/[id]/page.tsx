@@ -1,10 +1,10 @@
 import './page.scss';
-import { Service } from "@/types";
+import { Service, ServiceGroup } from "@/types";
 import { notFound } from "next/navigation";
 import ServiceSubscriberList from "./ServiceSubscriberList";
 import ServiceAPIKeyList from "./ServiceAPIKeyList";
 import ServiceGroupList from "./ServiceGroupList";
-import { getService } from '@/helpers/service';
+import { getService, getServiceGroups } from '@/helpers/service';
 import { getUser } from '@/helpers/server';
 
 interface ProjectPageParams {
@@ -12,17 +12,16 @@ interface ProjectPageParams {
 }
 
 export default async function ProjectPage ({ params }: ProjectPageParams) {
-  const user = await getUser()
   const serviceId = (await params).id
 
   const service = await getService(serviceId)
-  console.log(user, service)
+  const groups: ServiceGroup[] = await getServiceGroups(serviceId).then(x => x ?? [])
 
   if (!service) return notFound()
 
   return <div className="service-info-wrapper">
     <ServiceSubscriberList />
     <ServiceAPIKeyList />
-    <ServiceGroupList serviceId={serviceId} />
+    <ServiceGroupList serviceId={serviceId} groups={groups} />
   </div>
 }
