@@ -1,15 +1,16 @@
+use crate::gated::SessionUser;
 use crate::ExtractedAppData;
 use actix_session::Session;
-use actix_web::{get, post, web, Responder};
+use actix_web::http::StatusCode;
+use actix_web::{get, post, web, Either, Responder};
 use anyhow::Context;
 use entity::groups;
 use sea_orm::prelude::DateTime;
-use sea_orm::ColumnTrait;
-use sea_orm::EntityTrait;
 use sea_orm::QueryFilter;
-use serde::Serialize;
+use sea_orm::{ActiveValue, ColumnTrait};
+use sea_orm::{EntityTrait, SqlErr};
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use crate::gated::service::ReturnedService;
 
 #[derive(Serialize)]
 struct ReturnedGroup {
@@ -50,11 +51,43 @@ async fn get_all_groups(
     ))
 }
 
+#[derive(Deserialize, Debug)]
+pub struct PostGroupQuery {
+    name: String,
+}
+
 #[post("/group")]
 async fn post_group(
     data: ExtractedAppData,
     session: Session,
     service_id: web::Path<Uuid>,
+    query: web::Query<PostGroupQuery>,
 ) -> crate::Result<impl Responder> {
-    Ok("post group")
+    let session_user = session
+        .get::<SessionUser>("user")?
+        .context("no session user")?;
+
+    let group_id = Uuid::now_v7();
+
+    let insert_ent = groups::ActiveModel {
+        service_id: ActiveValue::set(service_id.into_inner()),
+        group_id: ActiveValue::set(group_id),
+        name: ActiveValue::set(query.into_inner().name),
+        last_notified: Default::default(),
+    };
+
+    let returned_ent = match groups::Entity::insert(insert_ent)
+        .exec_with_returning(&data.db)
+        .await
+    {
+        Ok(ent) => ent,
+        Err(e) if matches!(e.sql_err(), Some(SqlErr::UniqueConstraintViolation(_))) => {
+            return Ok(Either::Left(("dup name", StatusCode::BAD_REQUEST)));
+        }
+        Err(e) => return Err(e).context("insert new group")?,
+    };
+
+    Ok(Either::Right(web::Json::<ReturnedGroup>(
+        returned_ent.into(),
+    )))
 }
