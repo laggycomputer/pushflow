@@ -27,7 +27,7 @@ export default function ShowApiKeyDialog ({ apiKey }: ShowApiKeyDialogProps) {
     <Card>
       <CardHeader text="API Key Created" />
       <DialogContentText>
-        Your new API Key, "{apiKey.name}", has been successfully created. Copy it now and store
+        Your new API Key, &quot;{apiKey.name}&quot;, has been successfully created. Copy it now and store
         it somewhere safe, as it will not be shown again.
       </DialogContentText>
       <br />
