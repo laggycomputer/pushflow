@@ -1,13 +1,14 @@
 use crate::ExtractedAppData;
-use actix_web::{Responder, delete, get, post, web};
+use actix_web::http::StatusCode;
+use actix_web::{delete, get, post, web, Either, Responder};
 use anyhow::Context;
 use entity::api_key_scopes;
 use entity::api_keys;
 use entity::sea_orm_active_enums::KeyScope;
-use sea_orm::EntityTrait;
-use sea_orm::QueryFilter;
 use sea_orm::prelude::DateTime;
+use sea_orm::QueryFilter;
 use sea_orm::{ActiveModelTrait, ActiveValue, ColumnTrait, DbErr, TransactionTrait};
+use sea_orm::{EntityTrait, SqlErr, TransactionError};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -112,7 +113,7 @@ async fn post_key(
     let service_id = service_id.into_inner();
     let body = body.into_inner();
 
-    let key_id = data
+    let key_id = match data
         .db
         .transaction::<_, Uuid, DbErr>(move |txn| {
             Box::pin(async move {
@@ -126,8 +127,6 @@ async fn post_key(
                 }
                 .insert(txn)
                 .await?;
-
-                // TODO: throw CONFLICT on name unique cons violation
 
                 let scopes = body
                     .scopes
@@ -150,7 +149,15 @@ async fn post_key(
             })
         })
         .await
-        .context("insert key and scopes")?;
+    {
+        Ok(key_id) => key_id,
+        Err(TransactionError::Transaction(e))
+            if matches!(e.sql_err(), Some(SqlErr::UniqueConstraintViolation(_))) =>
+        {
+            return Ok(Either::Left(("dup name", StatusCode::CONFLICT)));
+        }
+        Err(other) => Err(other).context("insert key and scopes")?,
+    };
 
     let groups = api_keys::Entity::find_by_id(key_id)
         .find_with_related(api_key_scopes::Entity)
@@ -163,7 +170,10 @@ async fn post_key(
         .next()
         .context("should have created one key")?;
 
-    Ok(web::Json(ReturnedApiKey::new(one_key_and_scopes, false)))
+    Ok(Either::Right(web::Json(ReturnedApiKey::new(
+        one_key_and_scopes,
+        false,
+    ))))
 }
 
 #[delete("/{key_id}")]
