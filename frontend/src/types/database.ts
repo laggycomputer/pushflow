@@ -1,7 +1,6 @@
 export interface User {
   user_id: string;
-  google_id: string;
-  profile_url?: string;
+  avatar?: string;
 }
 
 export interface Service {
