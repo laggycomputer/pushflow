@@ -9,13 +9,22 @@ import DataRow, { DataRowInformation, DataRowStatItem } from "./DataRow";
 
 import BuildIcon from '@mui/icons-material/Build';
 import GroupIcon from '@mui/icons-material/Group';
+import { pluralize } from "@/helpers/util";
 
-export default function SubscriptionUser () {
+interface SubscriptionUserProps {
+  displayName: string;
+  createdAt: Date;
+  groupCount: number;
+}
+
+export default function SubscriptionUser (props: SubscriptionUserProps) {
+  const groupText = pluralize(props.groupCount, 'groups', 'group')
+
   return <DataRow>
     <IconWrapper flatShadow><PersonAddIcon/></IconWrapper>
-    <DataRowInformation title="This is a username or id">
-      <DataRowStatItem icon={<BuildIcon/>} text="Created 3y ago" />
-      <DataRowStatItem icon={<GroupIcon/>} text="2 groups" />
+    <DataRowInformation title={props.displayName}>
+      <DataRowStatItem icon={<BuildIcon/>} text={`Created ${props.createdAt.toLocaleDateString()}`} />
+      <DataRowStatItem icon={<GroupIcon/>} text={groupText} />
     </DataRowInformation>
     <ButtonGroup>
       <Button variant="text" size="small"><EditIcon/></Button>

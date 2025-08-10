@@ -12,7 +12,7 @@ export async function GET (request: NextRequest) {
   const oauthResponse = await fetch(url, { headers })
 
   const sidCookie = oauthResponse.headers.getSetCookie().find(c => c.startsWith('session='))!
-  cookieStore.set("session", sidCookie)
+  cookieStore.set("session", sidCookie.replace(/;.*/, ''), { httpOnly: true, sameSite: 'lax' })
 
   return NextResponse.json(await oauthResponse.text())
 }

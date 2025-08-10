@@ -13,6 +13,10 @@
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
 
+  > a {
+    display: contents;
+  }
+
   h1 {
     margin-right: auto;
   }
