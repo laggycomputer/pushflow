@@ -24,6 +24,7 @@ deadpool-redis = "0.16.0"
 futures-util = "0.3.31"
 vapid = "0.6.0"
 actix-web-httpauth = "0.8.2"
+serde_json = "1.0.142"
 
 [profile.release]
 lto = "fat"
