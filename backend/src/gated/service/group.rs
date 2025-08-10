@@ -1,8 +1,6 @@
-use crate::gated::SessionUser;
 use crate::ExtractedAppData;
-use actix_session::Session;
 use actix_web::http::StatusCode;
-use actix_web::{get, post, web, Either, Responder};
+use actix_web::{get, post, web, Either, HttpResponse, Responder};
 use anyhow::Context;
 use entity::groups;
 use sea_orm::prelude::DateTime;
@@ -85,4 +83,26 @@ async fn post_group(
     Ok(Either::Right(web::Json::<ReturnedGroup>(
         returned_ent.into(),
     )))
+}
+
+#[get("/group/{group_id}")]
+async fn get_one_group(
+    data: ExtractedAppData,
+    params: web::Path<(Uuid, Uuid)>,
+) -> crate::Result<impl Responder> {
+    let (service_id, group_id) = params.into_inner();
+
+    let groups = groups::Entity::find()
+        .filter(
+            groups::Column::ServiceId
+                .eq(service_id)
+                .and(groups::Column::GroupId.eq(group_id)),
+        )
+        .all(&data.db)
+        .await?;
+
+    Ok(match groups.first() {
+        None => Either::Left(HttpResponse::NotFound()),
+        Some(group) => Either::Right(web::Json::<ReturnedGroup>(group.clone().into())),
+    })
 }
