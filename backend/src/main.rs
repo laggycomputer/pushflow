@@ -172,7 +172,8 @@ async fn main() -> anyhow::Result<()> {
                                             web::scope("/group")
                                                 .service(gated::service::group::get_all_groups)
                                                 .service(gated::service::group::post_group)
-                                                .service(gated::service::group::get_one_group),
+                                                .service(gated::service::group::get_one_group)
+                                                .service(gated::service::group::delete_one_group),
                                         )
                                         .service(
                                             web::scope("/key")

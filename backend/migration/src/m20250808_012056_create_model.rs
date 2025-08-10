@@ -133,6 +133,7 @@ impl MigrationTrait for Migration {
                         .from(GroupSubscribers::Table, GroupSubscribers::GroupId)
                         .to(Groups::Table, Groups::ServiceId)
                         .to(Groups::Table, Groups::GroupId)
+                        .on_delete(ForeignKeyAction::Cascade)
                         .to_owned(),
                 )
                 .await?;
@@ -256,6 +257,7 @@ impl MigrationTrait for Migration {
                         .from(ApiKeyScopes::Table, ApiKeyScopes::ServiceId)
                         .to(Groups::Table, Groups::ServiceId)
                         .to(Groups::Table, Groups::GroupId)
+                        .on_delete(ForeignKeyAction::Cascade)
                         .to_owned(),
                 )
                 .await?;

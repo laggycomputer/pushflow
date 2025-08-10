@@ -1,8 +1,8 @@
 use crate::ExtractedAppData;
 use actix_web::http::StatusCode;
-use actix_web::{Either, HttpResponse, Responder, get, post, web};
+use actix_web::{Either, HttpResponse, Responder, get, post, web, delete};
 use anyhow::Context;
-use entity::groups;
+use entity::{groups, services};
 use sea_orm::QueryFilter;
 use sea_orm::prelude::DateTime;
 use sea_orm::{ActiveValue, ColumnTrait};
@@ -105,4 +105,19 @@ async fn get_one_group(
         None => Either::Left(HttpResponse::NotFound()),
         Some(group) => Either::Right(web::Json::<ReturnedGroup>(group.clone().into())),
     })
+}
+
+#[delete("/{group_id}")]
+pub async fn delete_one_group(
+    data: ExtractedAppData,
+    params: web::Path<(Uuid, Uuid)>,
+) -> crate::Result<impl Responder> {
+    let (service_id, group_id) = params.into_inner();
+
+    groups::Entity::delete_by_id((service_id, group_id))
+        .exec(&data.db)
+        .await
+        .context("delete group by id")?;
+
+    Ok("crab")
 }
