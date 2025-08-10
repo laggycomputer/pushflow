@@ -15,6 +15,7 @@ use crate::gated::service::ReturnedService;
 struct ReturnedGroup {
     group_id: Uuid,
     service_id: Uuid,
+    name: String,
     #[serde(with = "crate::util::naive_utc_rfc3339_opt")]
     last_notified: Option<DateTime>,
 }
@@ -24,6 +25,7 @@ impl Into<ReturnedGroup> for groups::Model {
         ReturnedGroup {
             group_id: self.group_id,
             service_id: self.service_id,
+            name: self.name,
             last_notified: self.last_notified,
         }
     }
