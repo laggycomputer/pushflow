@@ -75,7 +75,7 @@ async fn post_group(
     {
         Ok(ent) => ent,
         Err(e) if matches!(e.sql_err(), Some(SqlErr::UniqueConstraintViolation(_))) => {
-            return Ok(Either::Left(("dup name", StatusCode::BAD_REQUEST)));
+            return Ok(Either::Left(("dup name", StatusCode::CONFLICT)));
         }
         Err(e) => return Err(e).context("insert new group")?,
     };
