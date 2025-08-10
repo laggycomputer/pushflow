@@ -27,7 +27,7 @@ export default function ServiceApiKey ({ data: apiKey }: ServiceApiKeyProps) {
     group: 'Groups'
   }
   const scopesText = apiKey.scopes
-    .map(s => scopeNames[s.scope.inner])
+    .map(s => scopeNames[s.scope])
     .filter(t => !!t)
     .join(', ')
   console.log(apiKey.scopes)
