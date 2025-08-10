@@ -148,7 +148,8 @@ async fn main() -> anyhow::Result<()> {
                                         )
                                         .service(
                                             web::scope("/key")
-                                                .service(gated::service::key::get_all_keys),
+                                                .service(gated::service::key::get_all_keys)
+                                                .service(gated::service::key::post_key),
                                         ),
                                 ),
                         ),

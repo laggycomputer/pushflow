@@ -3,7 +3,7 @@ pub(crate) mod service;
 
 use actix_session::Session;
 use actix_web::http::StatusCode;
-use actix_web::{HttpResponse, Responder, get};
+use actix_web::{HttpResponse, Responder, get, post};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -21,7 +21,7 @@ pub async fn me(session: Session) -> crate::Result<impl Responder> {
     }
 }
 
-#[get("/logout")]
+#[post("/logout")]
 pub async fn logout(session: Session) -> crate::Result<impl Responder> {
     session.purge();
 

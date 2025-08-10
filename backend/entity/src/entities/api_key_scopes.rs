@@ -10,8 +10,8 @@ pub struct Model {
     pub scope_id: Uuid,
     pub key_id: Uuid,
     pub service_id: Uuid,
-    pub group_id: Uuid,
-    pub scope: Option<KeyScope>,
+    pub group_id: Option<Uuid>,
+    pub scope: KeyScope,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
