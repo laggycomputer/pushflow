@@ -160,10 +160,7 @@ async fn post_key(
         .await
         .context("fetch keys to return")?;
 
-    Ok(web::Json(
-        groups
-            .into_iter()
-            .map(|m| ReturnedApiKey::new(m, false))
-            .collect::<Vec<_>>(),
-    ))
+    let one_key_and_scopes = groups.into_iter().next().context("should have created one key")?;
+
+    Ok(web::Json(ReturnedApiKey::new(one_key_and_scopes, false)))
 }
