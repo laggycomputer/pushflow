@@ -13,9 +13,13 @@ use actix_web::{get, web, App, HttpServer, ResponseError};
 use anyhow::Context;
 use deadpool_redis::{Config, Runtime};
 use gated::middleware::RequireAuthBuilder;
+use migration::async_trait::async_trait;
 use migration::{Migrator, MigratorTrait};
 use std::ffi::OsString;
 use std::fmt::{Display, Formatter};
+use std::ops::Deref;
+use futures_util::SinkExt;
+use web_push::{request_builder, WebPushClient, WebPushError, WebPushMessage};
 
 const FIXED_SESSION_KEY: [u8; 64] = [
     0xe9, 0xde, 0x52, 0x01, 0x07, 0xd0, 0xf9, 0x16, 0xe3, 0x9a, 0x52, 0x39, 0x24, 0x68, 0xfd, 0xec,
@@ -50,8 +54,30 @@ impl ResponseError for AnyhowBridge {
 }
 
 #[derive(Clone)]
+struct HttpClient(pub reqwest::Client);
+
+impl Deref for HttpClient {
+    type Target = reqwest::Client;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+// #[async_trait]
+// impl WebPushClient for HttpClient {
+//     async fn send(&self, message: WebPushMessage) -> std::result::Result<(), WebPushError> {
+//         let request = request_builder::build_request::<Vec<u8>>(message);
+//
+//         self.0.request()
+//
+//         Ok(())
+//     }
+// }
+
+#[derive(Clone)]
 struct AppData {
-    client: reqwest::Client,
+    client: HttpClient,
     oauth: OAuth,
     jwt_keys: (jsonwebtoken::EncodingKey, jsonwebtoken::DecodingKey),
     db: sea_orm::DatabaseConnection,
@@ -93,7 +119,7 @@ async fn main() -> anyhow::Result<()> {
     .with_context(|| format!("connect to redis at {redis_url}"))?;
 
     let app_data = AppData {
-        client: reqwest::Client::new(),
+        client: HttpClient(reqwest::Client::new()),
         oauth: OAuth {
             frontend_url: std::env::var("FRONTEND_URL").context("need env var FRONTEND_URL")?,
             google: GoogleOAuthConfig {
