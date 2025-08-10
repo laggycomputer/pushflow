@@ -1,10 +1,10 @@
 pub(crate) mod group;
 pub(crate) mod key;
 
-use crate::ExtractedAppData;
 use crate::gated::SessionUser;
+use crate::ExtractedAppData;
 use actix_session::Session;
-use actix_web::{Either, HttpResponse, Responder, get, post, web};
+use actix_web::{delete, get, post, web, Either, HttpResponse, Responder};
 use anyhow::Context;
 use entity::services;
 use sea_orm::ColumnTrait;
@@ -98,4 +98,17 @@ pub async fn get_one_service(
         None => Either::Left(HttpResponse::NotFound()),
         Some(service) => Either::Right(web::Json::<ReturnedService>(service.clone().into())),
     })
+}
+
+#[delete("")]
+pub async fn delete_one_service(
+    data: ExtractedAppData,
+    service_id: web::Path<Uuid>,
+) -> crate::Result<impl Responder> {
+    services::Entity::delete_by_id(service_id.into_inner())
+        .exec(&data.db)
+        .await
+        .context("delete service by id")?;
+
+    Ok("crab")
 }
