@@ -25,18 +25,24 @@ struct PostSubscribeBodyKeys {
 }
 
 #[derive(Deserialize, Debug)]
-pub struct PostSubscribeBody {
+pub struct PostSubscribeSubscription {
     endpoint: String,
     keys: PostSubscribeBodyKeys,
     name: Option<String>,
     email: Option<String>,
 }
 
+#[derive(Deserialize, Debug)]
+struct PostSubscribeBody {
+    subscription: PostSubscribeSubscription,
+    groups: Vec<Uuid>,
+}
+
 async fn key_has_scope(
     db: &sea_orm::DatabaseConnection,
     key: &Uuid,
     service_id: &Uuid,
-    group_id: &Uuid,
+    group_id: &[Uuid],
     scope: KeyScope,
 ) -> crate::Result<bool> {
     Ok(api_key_scopes::Entity::find()
@@ -46,32 +52,32 @@ async fn key_has_scope(
                 .and(api_key_scopes::Column::ServiceId.eq(*service_id))
                 .and(
                     api_key_scopes::Column::GroupId
-                        .eq(*group_id)
+                        .is_in(group_id.into_iter().cloned())
                         .or(api_key_scopes::Column::GroupId.is_null()),
                 )
                 .and(api_key_scopes::Column::Scope.eq(scope)),
         )
         .count(db)
         .await?
-        == 0)
+        == group_id.len() as u64)
 }
 
 // TODO: set last_used
-#[post("/service/{service_id}/group/{group_id}/subscribe")]
+#[post("/service/{service_id}/subscribe")]
 async fn subscribe(
     data: ExtractedAppData,
     auth: BearerAuth,
-    params: web::Path<(Uuid, Uuid)>,
+    service_id: web::Path<Uuid>,
     body: web::Json<PostSubscribeBody>,
 ) -> crate::Result<impl Responder> {
     let Ok(auth) = auth.token().parse::<Uuid>() else {
         return Ok(Either::Left(("what", StatusCode::NOT_FOUND)));
     };
 
-    let (service_id, group_id) = params.into_inner();
+    let service_id = service_id.into_inner();
     let body = body.into_inner();
 
-    if !key_has_scope(&data.db, &auth, &service_id, &group_id, KeyScope::Sub).await? {
+    if !key_has_scope(&data.db, &auth, &service_id, &body.groups, KeyScope::Sub).await? {
         // disguise this
         return Ok(Either::Left(("what", StatusCode::NOT_FOUND)));
     }
@@ -81,7 +87,7 @@ async fn subscribe(
     data.db
         .transaction::<_, (), AnyhowBridge>(move |txn| {
             Box::pin(async move {
-                let endpoint = body.endpoint;
+                let endpoint = body.subscription.endpoint;
 
                 let sub_id = match subscribers::Entity::find()
                     .filter(subscribers::Column::Endpoint.eq(endpoint.clone()))
@@ -94,11 +100,12 @@ async fn subscribe(
 
                         let ent = subscribers::ActiveModel {
                             subscriber_id: ActiveValue::set(sub_id),
-                            name: ActiveValue::set(body.name),
-                            email: ActiveValue::set(body.email),
+                            name: ActiveValue::set(body.subscription.name),
+                            email: ActiveValue::set(body.subscription.email),
                             endpoint: ActiveValue::set(endpoint),
                             client_key: ActiveValue::Set(
-                                serde_json::to_string(&body.keys).context("json encode keys")?,
+                                serde_json::to_string(&body.subscription.keys)
+                                    .context("json encode keys")?,
                             ),
                         };
 
@@ -118,11 +125,16 @@ async fn subscribe(
                     }
                 };
 
-                group_subscribers::Entity::insert(group_subscribers::ActiveModel {
-                    service_id: ActiveValue::Set(service_id),
-                    group_id: ActiveValue::Set(group_id),
-                    subscriber_id: ActiveValue::set(sub_id),
-                })
+                group_subscribers::Entity::insert_many(
+                    body.groups
+                        .iter()
+                        .map(|group_id| group_subscribers::ActiveModel {
+                            service_id: ActiveValue::Set(service_id),
+                            group_id: ActiveValue::Set(group_id.clone()),
+                            subscriber_id: ActiveValue::set(sub_id),
+                        })
+                        .collect::<Vec<_>>(),
+                )
                 .on_conflict_do_nothing()
                 .exec(txn)
                 .await?;
@@ -154,7 +166,7 @@ async fn notify(
     let (service_id, group_id) = params.into_inner();
     let body = body.into_inner();
 
-    if !key_has_scope(&data.db, &auth, &service_id, &group_id, KeyScope::Notify).await? {
+    if !key_has_scope(&data.db, &auth, &service_id, &[group_id], KeyScope::Notify).await? {
         // disguise this
         return Ok(Either::Left(("what", StatusCode::NOT_FOUND)));
     }
