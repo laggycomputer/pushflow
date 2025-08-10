@@ -46,9 +46,7 @@ where
 
 type Result<T> = std::result::Result<T, AnyhowBridge>;
 
-impl ResponseError for AnyhowBridge {
-    // TODO: actual error contents
-}
+impl ResponseError for AnyhowBridge {}
 
 #[derive(Clone)]
 struct HttpClient(pub reqwest::Client);
