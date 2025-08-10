@@ -50,26 +50,22 @@ impl MigrationTrait for Migration {
                 .create_table(
                     Table::create()
                         .table(Subscribers::Table)
-                        .col(uuid(Subscribers::ServiceId))
-                        .col(uuid(Subscribers::SubscriberId))
+                        .col(pk_uuid(Subscribers::SubscriberId))
                         .col(string_null(Subscribers::Name))
                         .col(string_null(Subscribers::Email))
                         .col(string(Subscribers::Endpoint))
                         .col(string(Subscribers::ClientKey))
-                        .primary_key(
-                            Index::create()
-                                .col(Subscribers::ServiceId)
-                                .col(Subscribers::SubscriberId),
-                        )
                         .to_owned(),
                 )
                 .await?;
 
             manager
-                .create_foreign_key(
-                    ForeignKey::create()
-                        .from(Subscribers::Table, Subscribers::ServiceId)
-                        .to(Services::Table, Services::ServiceId)
+                .create_index(
+                    Index::create()
+                        .name("unique_subscriber_endpoint")
+                        .table(Subscribers::Table)
+                        .col(Subscribers::SubscriberId)
+                        .unique()
                         .to_owned(),
                 )
                 .await?;
@@ -142,9 +138,7 @@ impl MigrationTrait for Migration {
             manager
                 .create_foreign_key(
                     ForeignKey::create()
-                        .from(GroupSubscribers::Table, GroupSubscribers::ServiceId)
                         .from(GroupSubscribers::Table, GroupSubscribers::SubscriberId)
-                        .to(Subscribers::Table, Subscribers::ServiceId)
                         .to(Subscribers::Table, Subscribers::SubscriberId)
                         .to_owned(),
                 )
@@ -335,7 +329,6 @@ enum Services {
 #[derive(DeriveIden)]
 enum Subscribers {
     Table,
-    ServiceId,
     SubscriberId,
     Name,
     Email,

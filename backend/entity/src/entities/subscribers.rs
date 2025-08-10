@@ -5,9 +5,7 @@ use sea_orm::entity::prelude::*;
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
 #[sea_orm(table_name = "subscribers")]
 pub struct Model {
-    #[sea_orm(primary_key, auto_increment = false)]
-    pub service_id: Uuid,
-    #[sea_orm(primary_key, auto_increment = false)]
+    #[sea_orm(primary_key, auto_increment = false, unique)]
     pub subscriber_id: Uuid,
     pub name: Option<String>,
     pub email: Option<String>,
@@ -19,25 +17,11 @@ pub struct Model {
 pub enum Relation {
     #[sea_orm(has_many = "super::group_subscribers::Entity")]
     GroupSubscribers,
-    #[sea_orm(
-        belongs_to = "super::services::Entity",
-        from = "Column::ServiceId",
-        to = "super::services::Column::ServiceId",
-        on_update = "NoAction",
-        on_delete = "NoAction"
-    )]
-    Services,
 }
 
 impl Related<super::group_subscribers::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::GroupSubscribers.def()
-    }
-}
-
-impl Related<super::services::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Services.def()
     }
 }
 

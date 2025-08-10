@@ -21,8 +21,6 @@ pub enum Relation {
     ApiKeys,
     #[sea_orm(has_many = "super::groups::Entity")]
     Groups,
-    #[sea_orm(has_many = "super::subscribers::Entity")]
-    Subscribers,
     #[sea_orm(
         belongs_to = "super::users::Entity",
         from = "Column::OwnerId",
@@ -51,24 +49,9 @@ impl Related<super::groups::Entity> for Entity {
     }
 }
 
-impl Related<super::subscribers::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Subscribers.def()
-    }
-}
-
 impl Related<super::users::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Users.def()
-    }
-}
-
-impl Related<super::group_subscribers::Entity> for Entity {
-    fn to() -> RelationDef {
-        super::subscribers::Relation::GroupSubscribers.def()
-    }
-    fn via() -> Option<RelationDef> {
-        Some(super::subscribers::Relation::Services.def().rev())
     }
 }
 

@@ -24,8 +24,8 @@ pub enum Relation {
     Groups,
     #[sea_orm(
         belongs_to = "super::subscribers::Entity",
-        from = "(Column::ServiceId, Column::SubscriberId)",
-        to = "(super::subscribers::Column::ServiceId, super::subscribers::Column::SubscriberId)",
+        from = "Column::SubscriberId",
+        to = "super::subscribers::Column::SubscriberId",
         on_update = "NoAction",
         on_delete = "NoAction"
     )]
@@ -41,15 +41,6 @@ impl Related<super::groups::Entity> for Entity {
 impl Related<super::subscribers::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Subscribers.def()
-    }
-}
-
-impl Related<super::services::Entity> for Entity {
-    fn to() -> RelationDef {
-        super::subscribers::Relation::Services.def()
-    }
-    fn via() -> Option<RelationDef> {
-        Some(super::subscribers::Relation::GroupSubscribers.def().rev())
     }
 }
 
