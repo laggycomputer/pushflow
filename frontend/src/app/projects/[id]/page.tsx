@@ -4,15 +4,15 @@ import { notFound } from "next/navigation";
 import ServiceSubscriberList from "./ServiceSubscriberList";
 import ServiceAPIKeyList from "./ServiceAPIKeyList";
 import ServiceGroupList from "./ServiceGroupList";
-import { getUser } from '@/app/api/me/route';
 import { getService } from '@/helpers/service';
+import { getUser } from '@/helpers/server';
 
 interface ProjectPageParams {
   params: Promise<{ id: string }>
 }
 
 export default async function ProjectPage ({ params }: ProjectPageParams) {
-  const user = await getUser().then(x => x.json())
+  const user = await getUser()
   const serviceId = (await params).id
 
   const service = await getService(serviceId)
