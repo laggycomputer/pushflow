@@ -167,7 +167,7 @@ async fn notify(
     let svc = services::Entity::find_by_id(service_id.clone())
         .one(&data.db)
         .await
-        .context("get service by id")??;
+        .context("get service by id")?.context("no service by id")?;
 
     let mut it = group_subscribers::Entity::find()
         .filter(
