@@ -36,18 +36,6 @@ impl MigrationTrait for Migration {
                 .await?;
 
             manager
-                .create_index(
-                    Index::create()
-                        .name("unique_service_name")
-                        .table(Services::Table)
-                        .col(Services::OwnerId)
-                        .col(Services::Name)
-                        .unique()
-                        .to_owned(),
-                )
-                .await?;
-
-            manager
                 .create_foreign_key(
                     ForeignKey::create()
                         .from(Services::Table, Services::OwnerId)

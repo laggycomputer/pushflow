@@ -1,10 +1,10 @@
 use crate::ExtractedAppData;
 use actix_web::http::StatusCode;
-use actix_web::{get, post, web, Either, HttpResponse, Responder};
+use actix_web::{Either, HttpResponse, Responder, get, post, web};
 use anyhow::Context;
 use entity::groups;
-use sea_orm::prelude::DateTime;
 use sea_orm::QueryFilter;
+use sea_orm::prelude::DateTime;
 use sea_orm::{ActiveValue, ColumnTrait};
 use sea_orm::{EntityTrait, SqlErr};
 use serde::{Deserialize, Serialize};
@@ -19,13 +19,13 @@ struct ReturnedGroup {
     last_notified: Option<DateTime>,
 }
 
-impl Into<ReturnedGroup> for groups::Model {
-    fn into(self) -> ReturnedGroup {
+impl From<groups::Model> for ReturnedGroup {
+    fn from(val: groups::Model) -> Self {
         ReturnedGroup {
-            group_id: self.group_id,
-            service_id: self.service_id,
-            name: self.name,
-            last_notified: self.last_notified,
+            group_id: val.group_id,
+            service_id: val.service_id,
+            name: val.name,
+            last_notified: val.last_notified,
         }
     }
 }
