@@ -59,14 +59,9 @@ pub struct PostGroupQuery {
 #[post("/group")]
 async fn post_group(
     data: ExtractedAppData,
-    session: Session,
     service_id: web::Path<Uuid>,
     query: web::Query<PostGroupQuery>,
 ) -> crate::Result<impl Responder> {
-    let session_user = session
-        .get::<SessionUser>("user")?
-        .context("no session user")?;
-
     let group_id = Uuid::now_v7();
 
     let insert_ent = groups::ActiveModel {
