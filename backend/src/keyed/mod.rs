@@ -32,6 +32,7 @@ pub struct PostSubscribeBody {
     email: Option<String>,
 }
 
+// TODO: set last_used
 #[post("/service/{service_id}/group/{group_id}/subscribe")]
 async fn subscribe(
     data: ExtractedAppData,
@@ -210,6 +211,7 @@ async fn notify(
             builder.set_vapid_signature(sig_builder);
 
             // TODO: topic, urgency
+            // TODO: set last_notified
 
             if let Err(_) = client
                 .send(builder.build().context("build push message")?)
