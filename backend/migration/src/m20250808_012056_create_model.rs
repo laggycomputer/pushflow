@@ -64,7 +64,7 @@ impl MigrationTrait for Migration {
                     Index::create()
                         .name("unique_subscriber_endpoint")
                         .table(Subscribers::Table)
-                        .col(Subscribers::SubscriberId)
+                        .col(Subscribers::Endpoint)
                         .unique()
                         .to_owned(),
                 )
