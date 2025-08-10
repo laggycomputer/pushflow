@@ -215,8 +215,8 @@ impl MigrationTrait for Migration {
                         .col(pk_uuid(ApiKeyScopes::ScopeId))
                         .col(uuid(ApiKeyScopes::KeyId))
                         .col(uuid(ApiKeyScopes::ServiceId))
-                        .col(uuid(ApiKeyScopes::GroupId))
-                        .col(enumeration_null(
+                        .col(uuid_null(ApiKeyScopes::GroupId))
+                        .col(enumeration(
                             ApiKeyScopes::Scope,
                             "key_scope",
                             KeyScope::iter(),
