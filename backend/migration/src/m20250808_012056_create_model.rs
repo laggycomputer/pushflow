@@ -164,6 +164,7 @@ impl MigrationTrait for Migration {
                         .col(uuid(ApiKeys::ServiceId))
                         .col(pk_uuid(ApiKeys::KeyId))
                         .col(string(ApiKeys::Name))
+                        .col(binary(ApiKeys::Key))
                         .col(timestamp_null(ApiKeys::LastUsed))
                         .to_owned(),
                 )
@@ -176,6 +177,17 @@ impl MigrationTrait for Migration {
                         .table(ApiKeys::Table)
                         .col(ApiKeys::ServiceId)
                         .col(ApiKeys::Name)
+                        .unique()
+                        .to_owned(),
+                )
+                .await?;
+
+            manager
+                .create_index(
+                    Index::create()
+                        .name("unique_api_key_key")
+                        .table(ApiKeys::Table)
+                        .col(ApiKeys::Key)
                         .unique()
                         .to_owned(),
                 )
@@ -374,6 +386,7 @@ enum ApiKeys {
     ServiceId,
     KeyId,
     Name,
+    Key,
     LastUsed,
 }
 
