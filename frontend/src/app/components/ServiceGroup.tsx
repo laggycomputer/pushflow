@@ -1,7 +1,6 @@
 import { Button, ButtonGroup, Divider } from "@mui/material";
 import IconWrapper from "./IconWrapper";
 
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DataRow, { DataRowInformation, DataRowStatItem } from "./DataRow";

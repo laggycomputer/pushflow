@@ -1,5 +1,6 @@
 'use server';
 import config from "@/env";
+import { User } from "@/types";
 import { cookies } from "next/headers";
 
 export async function getSessionHeaders () {
@@ -11,12 +12,12 @@ export async function getSessionHeaders () {
   return { Cookie: sessionCookie.value.replace(/;.*/, ';') } as Record<string, string>
 }
 
-export async function getUser () {
+export async function getUser (): Promise<User | null> {
   const headers = await getSessionHeaders()
   if (!headers) return null
 
   const url = `${config.BACKEND_URL}/gated/me`
   const response = await fetch(url, { headers })
 
-  await response.json().catch(() => null)
+  return await response.json().catch(() => null)
 }

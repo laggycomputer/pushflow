@@ -3,7 +3,7 @@ import Card, { CardHeader } from "./components/Card";
 import { IconButton } from "@mui/material";
 
 import AddIcon from '@mui/icons-material/Add';
-import NewServicePopup from "./NewServicePopup";
+import NewServiceDialog from "./components/dialogs/NewServiceDialog";
 import { getAllServices } from "@/helpers/service";
 import { Service } from "@/types";
 import Link from "next/link";
@@ -28,7 +28,7 @@ export default async function Home() {
           <ServiceCard key={s.service_id} data={s} />
         )}
       </div>
-      <NewServicePopup />
+      <NewServiceDialog />
     </>
   );
 }

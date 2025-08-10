@@ -46,8 +46,9 @@ html, body {
   }
 }
 
-body {
+html > body {
   color: var(--foreground);
+  background-color: transparent;
   font-family: var(--font-roboto), Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

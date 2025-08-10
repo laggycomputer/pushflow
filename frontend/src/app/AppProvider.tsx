@@ -1,6 +1,8 @@
 'use client';
+import { store } from "@/store/store";
 import { createTheme, ThemeProvider } from "@mui/material";
 import { PropsWithChildren } from "react";
+import { Provider } from "react-redux";
 
 
 export default function AppProvider ({ children }: PropsWithChildren) {
@@ -54,6 +56,8 @@ export default function AppProvider ({ children }: PropsWithChildren) {
   });
 
   return <ThemeProvider theme={darkTheme}>
-    {children}
+    <Provider store={store}>
+      {children}
+    </Provider>
   </ThemeProvider>
 }
