@@ -2,7 +2,7 @@ mod middleware;
 
 use crate::{AnyhowBridge, ExtractedAppData};
 use actix_web::http::StatusCode;
-use actix_web::{Either, Responder, post, web};
+use actix_web::{post, web, Either, Responder};
 use actix_web_httpauth::extractors::bearer::BearerAuth;
 use anyhow::Context;
 use entity::sea_orm_active_enums::KeyScope;
@@ -32,6 +32,30 @@ pub struct PostSubscribeBody {
     email: Option<String>,
 }
 
+async fn key_has_scope(
+    db: &sea_orm::DatabaseConnection,
+    key: &Uuid,
+    service_id: &Uuid,
+    group_id: &Uuid,
+    scope: KeyScope,
+) -> crate::Result<bool> {
+    Ok(api_key_scopes::Entity::find()
+        .filter(
+            api_key_scopes::Column::KeyId
+                .eq(*key)
+                .and(api_key_scopes::Column::ServiceId.eq(*service_id))
+                .and(
+                    api_key_scopes::Column::GroupId
+                        .eq(*group_id)
+                        .or(api_key_scopes::Column::GroupId.is_null()),
+                )
+                .and(api_key_scopes::Column::Scope.eq(scope)),
+        )
+        .count(db)
+        .await?
+        == 0)
+}
+
 // TODO: set last_used
 #[post("/service/{service_id}/group/{group_id}/subscribe")]
 async fn subscribe(
@@ -47,22 +71,7 @@ async fn subscribe(
     let (service_id, group_id) = params.into_inner();
     let body = body.into_inner();
 
-    let count = api_key_scopes::Entity::find()
-        .filter(
-            api_key_scopes::Column::KeyId
-                .eq(auth)
-                .and(api_key_scopes::Column::ServiceId.eq(service_id))
-                .and(
-                    api_key_scopes::Column::GroupId
-                        .eq(group_id)
-                        .or(api_key_scopes::Column::GroupId.is_null()),
-                )
-                .and(api_key_scopes::Column::Scope.eq(KeyScope::Sub)),
-        )
-        .count(&data.db)
-        .await?;
-
-    if count == 0 {
+    if !key_has_scope(&data.db, &auth, &service_id, &group_id, KeyScope::Sub).await? {
         // disguise this
         return Ok(Either::Left(("what", StatusCode::NOT_FOUND)));
     }
@@ -145,22 +154,7 @@ async fn notify(
     let (service_id, group_id) = params.into_inner();
     let body = body.into_inner();
 
-    let count = api_key_scopes::Entity::find()
-        .filter(
-            api_key_scopes::Column::KeyId
-                .eq(auth)
-                .and(api_key_scopes::Column::ServiceId.eq(service_id))
-                .and(
-                    api_key_scopes::Column::GroupId
-                        .eq(group_id)
-                        .or(api_key_scopes::Column::GroupId.is_null()),
-                )
-                .and(api_key_scopes::Column::Scope.eq(KeyScope::Notify)),
-        )
-        .count(&data.db)
-        .await?;
-
-    if count == 0 {
+    if !key_has_scope(&data.db, &auth, &service_id, &group_id, KeyScope::Notify).await? {
         // disguise this
         return Ok(Either::Left(("what", StatusCode::NOT_FOUND)));
     }
