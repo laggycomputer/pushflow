@@ -64,8 +64,8 @@ impl ReturnedApiKey {
             service_id: val.0.service_id,
             name: val.0.name,
             key_preview: match trunc_key {
-                true => key_id,
-                false => key_id.split_off(24)
+                false => key_id,
+                true => key_id.split_off(24)
             },
             last_used: val.0.last_used,
             scopes: val.1.into_iter().map(|x| x.into()).collect(),
