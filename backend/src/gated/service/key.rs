@@ -65,7 +65,7 @@ impl ReturnedApiKey {
             name: val.0.name,
             key_preview: match trunc_key {
                 false => key_id,
-                true => key_id.split_off(24)
+                true => key_id.split_off(24),
             },
             last_used: val.0.last_used,
             scopes: val.1.into_iter().map(|x| x.into()).collect(),
@@ -127,8 +127,8 @@ async fn post_key(
                     name: ActiveValue::Set(body.name),
                     last_used: Default::default(),
                 }
-                    .insert(txn)
-                    .await?;
+                .insert(txn)
+                .await?;
 
                 // TODO: throw CONFLICT on name unique cons violation
 
