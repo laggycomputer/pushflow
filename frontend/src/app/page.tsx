@@ -1,30 +1,34 @@
-import Image from "next/image";
 import "./page.scss";
 import Card, { CardHeader } from "./components/Card";
 import { IconButton } from "@mui/material";
 
 import AddIcon from '@mui/icons-material/Add';
-import SubscriptionUser from "./components/SubscriptionUser";
-import DataList from "./components/DataList";
+import NewServicePopup from "./NewServicePopup";
+import { getAllServices } from "@/helpers/service";
+import { Service } from "@/types";
+import Link from "next/link";
 
-export default function Home() {
+function ServiceCard ({ data: { name, service_id: id } }: { data: Service }) {
+  return <Link href={'/projects/' + id}>
+    <Card>
+      <CardHeader text={name} />
+      <p>some text, some text</p>
+    </Card>
+  </Link>
+}
+
+export default async function Home() {
+  const userServices = await getAllServices()
+  if (!userServices) return null
+
   return (
-    <div className="page">
-      <main className="main">
-        <Card>
-          <CardHeader text="20 Subscribers">
-            <IconButton size="small">
-              <AddIcon/>
-            </IconButton>
-          </CardHeader>
-          <DataList>
-            <SubscriptionUser/>
-            <SubscriptionUser/>
-            <SubscriptionUser/>
-          </DataList>
-        </Card>
-
-      </main>
-    </div>
+    <>
+      <div className="services-grid">
+        {userServices.map(s => 
+          <ServiceCard key={s.service_id} data={s} />
+        )}
+      </div>
+      <NewServicePopup />
+    </>
   );
 }

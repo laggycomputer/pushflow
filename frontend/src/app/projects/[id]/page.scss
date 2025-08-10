@@ -1,0 +1,15 @@
+.service-info-wrapper {
+  display: grid;
+  padding: 108px 36px 36px;
+  grid-template-areas: 'A B' 'A C';
+  gap: 24px;
+  height: 100%;
+
+  > :first-child { grid-area: A; }
+  > :nth-child(2) { grid-area: B; }
+  > :nth-child(3) { grid-area: C; }
+
+  @media (max-width: 1120px) {
+    grid-template-areas: 'A' 'B' 'C';
+  }
+}

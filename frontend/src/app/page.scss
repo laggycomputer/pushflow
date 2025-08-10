@@ -1,3 +1,11 @@
+.services-grid {
+  display: grid;
+  padding: 108px 36px 36px;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+// default nextjs styles
 .page {
   --gray-rgb: 0, 0, 0;
   --gray-alpha-200: rgba(var(--gray-rgb), 0.08);
