@@ -4,11 +4,11 @@ mod util;
 
 use crate::gated::middleware::OwnsServiceBuilder;
 use crate::oauth::{GoogleOAuthConfig, OAuth};
-use actix_session::SessionMiddleware;
 use actix_session::storage::RedisSessionStore;
-use actix_web::Responder;
+use actix_session::SessionMiddleware;
 use actix_web::cookie::Key;
-use actix_web::{App, HttpServer, ResponseError, get, web};
+use actix_web::Responder;
+use actix_web::{get, web, App, HttpServer, ResponseError};
 use anyhow::Context;
 use deadpool_redis::{Config, Runtime};
 use gated::middleware::RequireAuthBuilder;
@@ -116,12 +116,10 @@ async fn main() -> anyhow::Result<()> {
 
     let server = {
         HttpServer::new(move || {
-            let session_middle = SessionMiddleware::builder(
-                session_store.clone(),
-                sess_key.clone(),
-            )
-            .cookie_name(String::from("session"))
-            .build();
+            let session_middle =
+                SessionMiddleware::builder(session_store.clone(), sess_key.clone())
+                    .cookie_name(String::from("session"))
+                    .build();
 
             App::new()
                 .app_data(web::Data::new(app_data.clone()))
@@ -142,9 +140,16 @@ async fn main() -> anyhow::Result<()> {
                                     web::scope("/{service_id}")
                                         .wrap(OwnsServiceBuilder)
                                         .service(gated::service::get_one_service)
-                                        .service(gated::service::group::get_all_groups)
-                                        .service(gated::service::group::post_group)
-                                        .service(gated::service::group::get_one_group)
+                                        .service(
+                                            web::scope("/group")
+                                                .service(gated::service::group::get_all_groups)
+                                                .service(gated::service::group::post_group)
+                                                .service(gated::service::group::get_one_group),
+                                        )
+                                        .service(
+                                            web::scope("/key")
+                                                .service(gated::service::key::get_all_keys),
+                                        ),
                                 ),
                         ),
                 )

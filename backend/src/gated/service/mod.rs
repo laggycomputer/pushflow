@@ -1,4 +1,5 @@
 pub(crate) mod group;
+pub(crate) mod key;
 
 use crate::ExtractedAppData;
 use crate::gated::SessionUser;

@@ -30,7 +30,7 @@ impl Into<ReturnedGroup> for groups::Model {
     }
 }
 
-#[get("/group")]
+#[get("")]
 async fn get_all_groups(
     data: ExtractedAppData,
     service_id: web::Path<Uuid>,
@@ -54,7 +54,7 @@ pub struct PostGroupQuery {
     name: String,
 }
 
-#[post("/group")]
+#[post("")]
 async fn post_group(
     data: ExtractedAppData,
     service_id: web::Path<Uuid>,
@@ -85,7 +85,7 @@ async fn post_group(
     )))
 }
 
-#[get("/group/{group_id}")]
+#[get("/{group_id}")]
 async fn get_one_group(
     data: ExtractedAppData,
     params: web::Path<(Uuid, Uuid)>,
