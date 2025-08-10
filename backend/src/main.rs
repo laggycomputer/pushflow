@@ -155,9 +155,10 @@ async fn main() -> anyhow::Result<()> {
                                 ),
                         ),
                 )
-                .service(web::scope("/keyed")
-                    .service(keyed::subscribe)
-                    .service(keyed::notify)
+                .service(
+                    web::scope("/keyed")
+                        .service(keyed::subscribe)
+                        .service(keyed::notify),
                 )
         })
         .bind(("0.0.0.0", port))
