@@ -146,7 +146,15 @@ async fn subscribe(
                         })
                         .collect::<Vec<_>>(),
                 )
-                .on_conflict_do_nothing()
+                .on_conflict(
+                    OnConflict::columns([
+                        group_subscribers::Column::ServiceId,
+                        group_subscribers::Column::GroupId,
+                        group_subscribers::Column::SubscriberId,
+                    ])
+                    .do_nothing()
+                    .to_owned(),
+                )
                 .exec(txn)
                 .await?;
 
