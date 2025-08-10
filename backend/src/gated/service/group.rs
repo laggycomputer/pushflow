@@ -19,13 +19,13 @@ struct ReturnedGroup {
     last_notified: Option<DateTime>,
 }
 
-impl Into<ReturnedGroup> for groups::Model {
-    fn into(self) -> ReturnedGroup {
+impl From<groups::Model> for ReturnedGroup {
+    fn from(val: groups::Model) -> Self {
         ReturnedGroup {
-            group_id: self.group_id,
-            service_id: self.service_id,
-            name: self.name,
-            last_notified: self.last_notified,
+            group_id: val.group_id,
+            service_id: val.service_id,
+            name: val.name,
+            last_notified: val.last_notified,
         }
     }
 }

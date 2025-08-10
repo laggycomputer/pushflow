@@ -1,7 +1,3 @@
-use sea_orm::ActiveEnum;
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use std::task::Wake;
-
 // turn chrono NaiveDateTime (as sea_orm::prelude::DateTime) into ISO 8601 and back
 pub mod naive_utc_rfc3339 {
     use sea_orm::prelude::{DateTime, DateTimeWithTimeZone};
@@ -58,7 +54,7 @@ pub mod naive_utc_rfc3339_opt {
 
 pub mod active_enum {
     use sea_orm::ActiveEnum;
-    use serde::{Deserialize, Deserializer, Serializer, de, Serialize};
+    use serde::{Deserialize, Deserializer, Serializer, de};
 
     trait ActiveEnumSerialize: Sized {
         fn from_str(s: &str) -> Option<Self>;
@@ -89,7 +85,7 @@ pub mod active_enum {
         S: Serializer,
     {
         let s = active_enum.to_string();
-        serializer.serialize_str(&*s)
+        serializer.serialize_str(&s)
     }
 
     pub fn deserialize<'de, A, D>(deserializer: D) -> Result<A, D::Error>

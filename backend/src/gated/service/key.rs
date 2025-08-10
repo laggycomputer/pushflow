@@ -1,14 +1,14 @@
 use crate::ExtractedAppData;
-use actix_web::{get, web, Responder};
+use actix_web::{Responder, get, web};
 use anyhow::Context;
 use entity::api_key_scopes;
 use entity::api_keys;
 use entity::sea_orm_active_enums::KeyScope;
-use sea_orm::prelude::DateTime;
 use sea_orm::EntityTrait;
 use sea_orm::QueryFilter;
+use sea_orm::prelude::DateTime;
 use sea_orm::{ActiveEnum, ColumnTrait};
-use serde::{Serialize, Serializer};
+use serde::Serialize;
 use uuid::Uuid;
 
 #[derive(Serialize)]
@@ -17,9 +17,9 @@ struct KeyScope2 {
     inner: KeyScope,
 }
 
-impl Into<KeyScope2> for KeyScope {
-    fn into(self) -> KeyScope2 {
-        KeyScope2 { inner: self }
+impl From<KeyScope> for KeyScope2 {
+    fn from(val: KeyScope) -> Self {
+        KeyScope2 { inner: val }
     }
 }
 
@@ -30,12 +30,12 @@ struct ReturnedApiKeyScope {
     pub scope: Option<KeyScope2>,
 }
 
-impl Into<ReturnedApiKeyScope> for api_key_scopes::Model {
-    fn into(self) -> ReturnedApiKeyScope {
+impl From<api_key_scopes::Model> for ReturnedApiKeyScope {
+    fn from(val: api_key_scopes::Model) -> Self {
         ReturnedApiKeyScope {
-            service_id: self.service_id,
-            group_id: self.group_id,
-            scope: self.scope.map(|s| s.into()),
+            service_id: val.service_id,
+            group_id: val.group_id,
+            scope: val.scope.map(|s| s.into()),
         }
     }
 }
@@ -49,13 +49,13 @@ struct ReturnedApiKey {
     scopes: Vec<ReturnedApiKeyScope>,
 }
 
-impl Into<ReturnedApiKey> for (api_keys::Model, Vec<api_key_scopes::Model>) {
-    fn into(self) -> ReturnedApiKey {
+impl From<(api_keys::Model, Vec<api_key_scopes::Model>)> for ReturnedApiKey {
+    fn from(val: (api_keys::Model, Vec<api_key_scopes::Model>)) -> Self {
         ReturnedApiKey {
-            service_id: self.0.service_id,
-            key_preview: self.0.key_id.to_string().split_off(24),
-            last_used: self.0.last_used,
-            scopes: self.1.into_iter().map(|x| x.into()).collect(),
+            service_id: val.0.service_id,
+            key_preview: val.0.key_id.to_string().split_off(24),
+            last_used: val.0.last_used,
+            scopes: val.1.into_iter().map(|x| x.into()).collect(),
         }
     }
 }
