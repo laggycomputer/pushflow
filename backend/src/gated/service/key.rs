@@ -1,17 +1,17 @@
 use crate::ExtractedAppData;
-use actix_web::{Responder, get, web};
+use actix_web::{get, post, web, Responder};
 use anyhow::Context;
 use entity::api_key_scopes;
 use entity::api_keys;
 use entity::sea_orm_active_enums::KeyScope;
-use sea_orm::ColumnTrait;
-use sea_orm::EntityTrait;
-use sea_orm::QueryFilter;
 use sea_orm::prelude::DateTime;
-use serde::Serialize;
+use sea_orm::QueryFilter;
+use sea_orm::{ActiveModelTrait, ActiveValue, ColumnTrait, DbErr, TransactionTrait};
+use sea_orm::EntityTrait;
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 struct KeyScope2 {
     #[serde(with = "crate::util::active_enum")]
     inner: KeyScope,
@@ -20,6 +20,12 @@ struct KeyScope2 {
 impl From<KeyScope> for KeyScope2 {
     fn from(val: KeyScope) -> Self {
         KeyScope2 { inner: val }
+    }
+}
+
+impl From<KeyScope2> for KeyScope {
+    fn from(value: KeyScope2) -> Self {
+        value.inner
     }
 }
 
@@ -71,6 +77,77 @@ async fn get_all_keys(
         .all(&data.db)
         .await
         .context("fetch keys")?;
+
+    Ok(web::Json(
+        groups
+            .into_iter()
+            .map(|m| m.into())
+            .collect::<Vec<ReturnedApiKey>>(),
+    ))
+}
+
+#[derive(Deserialize)]
+struct SentApiKeyScope {
+    group: Option<Uuid>,
+    scope: KeyScope2,
+}
+
+#[derive(Deserialize)]
+struct PostApiKeyBody {
+    name: String,
+    scopes: Vec<SentApiKeyScope>,
+}
+
+#[post("")]
+async fn post_key(
+    data: ExtractedAppData,
+    service_id: web::Path<Uuid>,
+    body: web::Json<PostApiKeyBody>,
+) -> crate::Result<impl Responder> {
+    let service_id = service_id.into_inner();
+    let body = body.into_inner();
+
+    let key_id = data
+        .db
+        .transaction::<_, Uuid, DbErr>(move |txn| {
+            Box::pin(async move {
+                let key_id = Uuid::now_v7();
+
+                let new_key = api_keys::ActiveModel {
+                    service_id: ActiveValue::set(service_id),
+                    key_id: ActiveValue::Set(key_id),
+                    name: ActiveValue::Set(body.name),
+                    last_used: Default::default(),
+                };
+                new_key.clone().save(txn).await?;
+
+                let scopes = body
+                    .scopes
+                    .into_iter()
+                    .map(|scope| api_key_scopes::ActiveModel {
+                        scope_id: Default::default(),
+                        key_id: ActiveValue::set(key_id),
+                        service_id: ActiveValue::set(service_id),
+                        group_id: ActiveValue::set(scope.group),
+                        scope: ActiveValue::set(scope.scope.into()),
+                    })
+                    .collect::<Vec<_>>();
+
+                api_key_scopes::Entity::insert_many(scopes)
+                    .exec(txn)
+                    .await?;
+
+                Ok(key_id)
+            })
+        })
+        .await
+        .context("insert key and scopes")?;
+
+    let groups = api_keys::Entity::find_by_id(key_id)
+        .find_with_related(api_key_scopes::Entity)
+        .all(&data.db)
+        .await
+        .context("fetch keys to return")?;
 
     Ok(web::Json(
         groups
