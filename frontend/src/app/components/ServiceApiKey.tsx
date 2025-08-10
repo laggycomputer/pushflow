@@ -16,7 +16,7 @@ interface ServiceApiKeyProps {
 }
 
 export default function ServiceApiKey ({ data: apiKey }: ServiceApiKeyProps) {
-  const title = `${apiKey.name ? apiKey.name + ' • ' : ''}${apiKey.key_preview}...`
+  const title = `${apiKey.name ? apiKey.name + ' • ' : ''}...${apiKey.key_preview}`
   const lastUsed = apiKey.last_used
     ? 'Used ' + new Date(apiKey.last_used).toLocaleDateString()
     : 'Never used'

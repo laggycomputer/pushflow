@@ -15,6 +15,6 @@ export async function POST (request: NextRequest, { params }: { params: Promise<
   const body = JSON.stringify({ subscription, groups })
   const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey }
 
-  const response = await fetch(url, { method: 'POST', headers, body }).then(x => x.json())
+  const response = await fetch(url, { method: 'POST', headers, body }).then(x => x.text())
   return NextResponse.json(response)
 }

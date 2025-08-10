@@ -27,7 +27,7 @@ export default function ServiceAPIKeyList ({ serviceId, apiKeys }: ServiceAPIKey
 
   const openCreateApiKeyDialog = () => dispatch(setActiveDialog(DialogName.NewServiceApiKeyPopup))
   const handleCreateKey = (apiKey: ServiceApiKey) => {
-    const truncated = apiKey.key_preview.replace(/-.*$/, '')
+    const truncated = apiKey.key_preview.replace(/^.*-/, '')
     const dataWithTruncation = { ...apiKey, key_preview: truncated }
     setShownKeys([dataWithTruncation, ...shownKeys])
 
