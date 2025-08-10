@@ -238,6 +238,7 @@ impl MigrationTrait for Migration {
                     ForeignKey::create()
                         .from(ApiKeyScopes::Table, ApiKeyScopes::KeyId)
                         .to(ApiKeys::Table, ApiKeys::KeyId)
+                        .on_delete(ForeignKeyAction::Cascade)
                         .to_owned(),
                 )
                 .await?;

@@ -1,5 +1,5 @@
 use crate::ExtractedAppData;
-use actix_web::{get, post, web, Responder};
+use actix_web::{delete, get, post, web, Responder};
 use anyhow::Context;
 use entity::api_key_scopes;
 use entity::api_keys;
@@ -164,4 +164,19 @@ async fn post_key(
     let one_key_and_scopes = groups.into_iter().next().context("should have created one key")?;
 
     Ok(web::Json(ReturnedApiKey::new(one_key_and_scopes, false)))
+}
+
+#[delete("/{key_id}")]
+async fn delete_one_key(
+    data: ExtractedAppData,
+    params: web::Path<(Uuid, Uuid)>,
+) -> crate::Result<impl Responder> {
+    let (_, key_id) = params.into_inner();
+
+    api_keys::Entity::delete_by_id(key_id)
+        .exec(&data.db)
+        .await
+        .context("delete key by id")?;
+
+    Ok("crab")
 }
