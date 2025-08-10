@@ -30,11 +30,6 @@ impl From<services::Model> for ReturnedService {
     }
 }
 
-#[derive(Deserialize, Debug)]
-pub struct PostServiceQuery {
-    name: String,
-}
-
 #[get("")]
 async fn get_service(data: ExtractedAppData, session: Session) -> crate::Result<impl Responder> {
     let session_user = session
@@ -52,6 +47,11 @@ async fn get_service(data: ExtractedAppData, session: Session) -> crate::Result<
             .map(|m| m.into())
             .collect::<Vec<ReturnedService>>(),
     ))
+}
+
+#[derive(Deserialize, Debug)]
+pub struct PostServiceQuery {
+    name: String,
 }
 
 #[post("")]
