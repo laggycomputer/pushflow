@@ -50,16 +50,27 @@ async fn key_has_scope(
             api_key_scopes::Column::KeyId
                 .eq(*key)
                 .and(api_key_scopes::Column::ServiceId.eq(*service_id))
-                .and(
-                    api_key_scopes::Column::GroupId
-                        .is_in(group_id.into_iter().cloned())
-                        .or(api_key_scopes::Column::GroupId.is_null()),
-                )
-                .and(api_key_scopes::Column::Scope.eq(scope)),
+                .and(api_key_scopes::Column::GroupId.is_null())
+                .and(api_key_scopes::Column::Scope.eq(scope.clone())),
         )
         .count(db)
         .await?
-        == group_id.len() as u64)
+        > 0
+        || api_key_scopes::Entity::find()
+            .filter(
+                api_key_scopes::Column::KeyId
+                    .eq(*key)
+                    .and(api_key_scopes::Column::ServiceId.eq(*service_id))
+                    .and(
+                        api_key_scopes::Column::GroupId
+                            .is_in(group_id.into_iter().cloned())
+                            .or(api_key_scopes::Column::GroupId.is_null()),
+                    )
+                    .and(api_key_scopes::Column::Scope.eq(scope)),
+            )
+            .count(db)
+            .await?
+            == group_id.len() as u64)
 }
 
 // TODO: set last_used
