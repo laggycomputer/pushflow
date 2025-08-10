@@ -20,7 +20,6 @@ export default function Header ({ user }: { user: User | null }) {
   }
 
   const openCreateNewServiceForm = () => dispatch(setActiveDialog(DialogName.NewServicePopup))
-  console.log(user)
 
   return <div className="app-header">
     <Link href="/">

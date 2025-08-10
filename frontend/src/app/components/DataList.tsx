@@ -6,3 +6,8 @@ export default function DataList ({ children }: PropsWithChildren) {
     {children}
   </div>
 }
+
+export function EmptyListMessage ({ list, message }: { list: unknown[]; message: string; }) {
+  if (list.length > 0) return null;
+  return <p className="empty-list-message">{message}</p>
+}

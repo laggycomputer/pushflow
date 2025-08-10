@@ -9,23 +9,34 @@ import DataRow, { DataRowInformation, DataRowStatItem } from "./DataRow";
 import BuildIcon from '@mui/icons-material/Build';
 import WatchLaterIcon from '@mui/icons-material/WatchLater';
 import CodeIcon from '@mui/icons-material/Code';
+import { ServiceApiKey as ApiKey } from "@/types";
 
 interface ServiceApiKeyProps {
-  name?: string;
-  keyUuid: string;
-  scopes: string[];
-  lastUsed: Date;
+  data: ApiKey
 }
 
-export default function ServiceApiKey (props: ServiceApiKeyProps) {
-  const title = `${props.name ? props.name + ' • ' : ''}${props.keyUuid.slice(0, 8)}...`
-  const lastUsed = props.lastUsed.toLocaleDateString()
+export default function ServiceApiKey ({ data: apiKey }: ServiceApiKeyProps) {
+  const title = `${apiKey.name ? apiKey.name + ' • ' : ''}${apiKey.key_preview}...`
+  const lastUsed = apiKey.last_used
+    ? 'Used ' + new Date(apiKey.last_used).toLocaleDateString()
+    : 'Never used'
+
+  const scopeNames: Record<string, string> = {
+    sub: 'Subscriptions',
+    notify: 'Notifications',
+    group: 'Groups'
+  }
+  const scopesText = apiKey.scopes
+    .map(s => scopeNames[s.scope.inner])
+    .filter(t => !!t)
+    .join(', ')
+  console.log(apiKey.scopes)
 
   return <DataRow>
     <IconWrapper flatShadow><PersonAddIcon /></IconWrapper>
     <DataRowInformation title={title}>
-      <DataRowStatItem icon={<BuildIcon/>} text="Add Subscription" />
-      <DataRowStatItem icon={<WatchLaterIcon/>} text={'Used ' + lastUsed} />
+      <DataRowStatItem icon={<BuildIcon/>} text={scopesText} />
+      <DataRowStatItem icon={<WatchLaterIcon/>} text={lastUsed} />
     </DataRowInformation>
     <ButtonGroup>
       <Button variant="text" size="small"><EditIcon /></Button>

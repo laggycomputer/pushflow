@@ -1,5 +1,5 @@
 'use server';
-import { Service, ServiceGroup } from "@/types"
+import { Service } from "@/types"
 import { getSessionHeaders } from "./server"
 import config from "@/env"
 
@@ -24,18 +24,6 @@ export async function getService (id: string): Promise<Service | null> {
     .then(x => x.json())
     .catch(err => console.error(err))
 
-  return response
-}
-
-export async function getServiceGroups (serviceId: string): Promise<ServiceGroup[] | null> {
-  const headers = await getSessionHeaders()
-  if (!headers) return null
-
-  const url = `${config.BACKEND_URL}/gated/service/${encodeURIComponent(serviceId)}/group`
-  const response = await fetch(url, { headers })
-    .then(x => x.json())
-    .catch(err => console.error(err))
-  
   return response
 }
 

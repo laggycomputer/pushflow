@@ -29,9 +29,10 @@ export interface ServiceGroup {
 }
 
 export interface ServiceApiKey {
+  name: string;
   service_id: string;
-  key_uuid: string;
+  key_preview: string;
   last_used: string;
   created_at: string;
-  scopes: string[]; // may expand to { role: '', group: '' } later
+  scopes: { scope: string; group_id?: string; }[];
 }

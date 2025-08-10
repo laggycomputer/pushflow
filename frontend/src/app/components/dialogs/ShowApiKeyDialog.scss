@@ -1,0 +1,12 @@
+#show-api-key-dialog {
+  .copy-box {
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+    user-select: all;
+  }
+  .copy-box .MuiIconButton-root {
+    margin: -6px -10px;
+    margin-left: auto;
+  }
+}

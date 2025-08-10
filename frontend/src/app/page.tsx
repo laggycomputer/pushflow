@@ -7,6 +7,7 @@ import NewServiceDialog from "./components/dialogs/NewServiceDialog";
 import { getAllServices } from "@/helpers/service";
 import { Service } from "@/types";
 import Link from "next/link";
+import { EmptyListMessage } from "./components/DataList";
 
 function ServiceCard ({ data: { name, service_id: id } }: { data: Service }) {
   return <Link href={'/projects/' + id}>
@@ -27,6 +28,7 @@ export default async function Home() {
         {userServices.map(s => 
           <ServiceCard key={s.service_id} data={s} />
         )}
+        <EmptyListMessage list={userServices} message="You don't have any services yet!" />
       </div>
       <NewServiceDialog />
     </>

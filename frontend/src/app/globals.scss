@@ -65,6 +65,16 @@ a {
   text-decoration: none;
 }
 
+.theme-emphasis-box {
+  box-shadow: var(--shadow-emphasis);
+  padding: 16px 20px;
+  border-radius: var(--border-radius-card);
+}
+
+button.theme-none {
+  box-shadow: none;
+}
+
 // MUI Overrides
 .MuiButtonGroup-root {
   .MuiButton-sizeSmall { min-width: 0; }

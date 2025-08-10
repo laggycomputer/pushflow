@@ -16,3 +16,15 @@ export async function createGroup (serviceId: string, name: string): Promise<Ser
     .then(x => x.json())
     .catch(err => console.error(err))
 }
+
+export async function getServiceGroups (serviceId: string): Promise<ServiceGroup[] | null> {
+  const headers = await getSessionHeaders()
+  if (!headers) return null
+
+  const url = `${config.BACKEND_URL}/gated/service/${encodeURIComponent(serviceId)}/group`
+  const response = await fetch(url, { headers })
+    .then(x => x.json())
+    .catch(err => console.error(err))
+  
+  return response
+}
