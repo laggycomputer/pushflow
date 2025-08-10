@@ -49,6 +49,7 @@ impl From<api_key_scopes::Model> for ReturnedApiKeyScope {
 #[derive(Serialize)]
 struct ReturnedApiKey {
     service_id: Uuid,
+    name: String,
     key_preview: String,
     #[serde(with = "crate::util::naive_utc_rfc3339_opt")]
     last_used: Option<DateTime>,
@@ -61,6 +62,7 @@ impl ReturnedApiKey {
 
         ReturnedApiKey {
             service_id: val.0.service_id,
+            name: val.0.name,
             key_preview: match trunc_key {
                 true => key_id,
                 false => key_id.split_off(24)
