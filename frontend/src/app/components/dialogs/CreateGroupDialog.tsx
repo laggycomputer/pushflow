@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { DialogName } from "@/helpers/dialog";
-import { setActiveDialog } from "@/store/slices/dialogSlice";
+import { closeDialog } from "@/store/slices/dialogSlice";
 import { createGroup } from "@/helpers/service-group";
 import { ServiceGroup } from "@/types";
 
@@ -21,7 +21,7 @@ export default function CreateGroupDialog ({ serviceId, onCreate }: CreateGroupD
   const [submitting, setSubmitting] = useState(false)
   const [groupName, setGroupName] = useState('')
   
-  const handleClose = () => dispatch(setActiveDialog(null))
+  const handleClose = () => dispatch(closeDialog())
 
   const handleSubmit = async (event: React.FormEvent) => {
     setSubmitting(true)
@@ -45,6 +45,7 @@ export default function CreateGroupDialog ({ serviceId, onCreate }: CreateGroupD
           label="Group Name"
           fullWidth
           onChange={e => setGroupName(e.target.value)}
+          disabled={submitting}
         />
       </form>
       <DialogActions>

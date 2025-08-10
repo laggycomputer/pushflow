@@ -1,9 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit';
 import dialogReducer from './slices/dialogSlice';
+import serviceReducer from './slices/serviceSlice';
 
 export const store = configureStore({
   reducer: {
-    dialog: dialogReducer
+    dialog: dialogReducer,
+    service: serviceReducer
   },
 });
 

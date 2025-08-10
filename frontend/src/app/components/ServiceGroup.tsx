@@ -1,3 +1,4 @@
+'use client';
 import { Button, ButtonGroup, Divider } from "@mui/material";
 import IconWrapper from "./IconWrapper";
 
@@ -9,21 +10,30 @@ import GroupIcon from '@mui/icons-material/Group';
 import WatchLaterIcon from '@mui/icons-material/WatchLater';
 import WarningIcon from '@mui/icons-material/Warning';
 import { pluralize } from "@/helpers/util";
+import { useAppDispatch } from "@/store/hooks";
+import { openDialogWithKey } from "@/store/slices/dialogSlice";
+import { DialogName } from "@/helpers/dialog";
 
 interface BaseServiceGroupProps {
   name: string;
   userCount?: number;
   isService?: boolean;
   lastNotified: Date;
+  groupId?: string;
 }
 
 type ServiceGroupProps = BaseServiceGroupProps &
-  ({ isService: true; userCount?: never; } | { userCount: number })
+  ({ isService: true; userCount?: never; groupId?: never } | { userCount: number; groupId: string; })
 
 export default function ServiceGroup (props: ServiceGroupProps) {
+  const dispatch = useAppDispatch()
   const lastNotified = props.lastNotified.toLocaleDateString()
   const userCountText = props.isService ? 'All users' : pluralize(props.userCount, 'users', 'user')
   const icon = props.isService ? <WarningIcon /> : <GroupIcon />
+
+  const openDeleteDialog = () => {
+    dispatch(openDialogWithKey({ name: DialogName.DeleteServiceGroupPopup, key: props.groupId! }))
+  }
 
   return <DataRow>
     <IconWrapper flatShadow>{icon}</IconWrapper>
@@ -34,7 +44,7 @@ export default function ServiceGroup (props: ServiceGroupProps) {
     <ButtonGroup>
       <Button variant="text" size="small"><EditIcon /></Button>
       <Divider/>
-      <Button variant="text" size="small" disabled={props.isService}><DeleteIcon /></Button>
+      <Button variant="text" size="small" disabled={props.isService} onClick={openDeleteDialog}><DeleteIcon /></Button>
     </ButtonGroup>
   </DataRow>
 }

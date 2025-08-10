@@ -2,11 +2,9 @@
 import { Button, Checkbox, Dialog, DialogActions, FormControl, FormControlLabel, FormGroup, FormLabel, TextField } from "@mui/material";
 import Card, { CardHeader } from "../Card";
 import { ChangeEvent, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { DialogName } from "@/helpers/dialog";
-import { setActiveDialog } from "@/store/slices/dialogSlice";
-import { createGroup } from "@/helpers/service-group";
+import { closeDialog } from "@/store/slices/dialogSlice";
 import { ServiceApiKey } from "@/types";
 import { createServiceApiKey } from "@/helpers/service-api-key";
 
@@ -34,7 +32,7 @@ export default function CreateApiKeyDialog ({ serviceId, onCreate }: CreateApiKe
   
   const selectedScopes = scopeKeys.filter(key => scopes[key])
 
-  const handleClose = () => dispatch(setActiveDialog(null))
+  const handleClose = () => dispatch(closeDialog())
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
@@ -72,6 +70,7 @@ export default function CreateApiKeyDialog ({ serviceId, onCreate }: CreateApiKe
           label="API Key Name"
           fullWidth
           onChange={e => setKeyName(e.target.value)}
+          disabled={submitting}
         />
         <br />
         <br />
@@ -86,6 +85,7 @@ export default function CreateApiKeyDialog ({ serviceId, onCreate }: CreateApiKe
                 checked={scopes[key]}
                 onChange={handleCheckboxChange}
                 name={key}
+                disabled={submitting}
               />}
             />)}
           </FormGroup>

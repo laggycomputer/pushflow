@@ -6,6 +6,12 @@ export async function subscribeToNotifications (serviceId: string, groups: strin
   const status = await Notification.requestPermission()
   if (!worker || status !== 'granted') return console.error('Permission not granted')
 
+  // TEMP: unsubscribe if needed
+  const subscription = await worker.pushManager.getSubscription()
+  if (subscription) await subscription.unsubscribe()
+
+  console.log(applicationServerKey, subscription)
+
   const headers = { 'Content-Type': 'application/json' }
   const details = await worker.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey })
   const body = JSON.stringify({
