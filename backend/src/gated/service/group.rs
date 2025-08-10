@@ -1,8 +1,8 @@
 use crate::ExtractedAppData;
 use actix_web::http::StatusCode;
-use actix_web::{Either, HttpResponse, Responder, get, post, web, delete};
+use actix_web::{Either, HttpResponse, Responder, delete, get, post, web};
 use anyhow::Context;
-use entity::{groups, services};
+use entity::groups;
 use sea_orm::QueryFilter;
 use sea_orm::prelude::DateTime;
 use sea_orm::{ActiveValue, ColumnTrait};

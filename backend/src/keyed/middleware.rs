@@ -14,14 +14,14 @@
 // use std::future::{ready, Ready};
 // use std::task::{Context, Poll};
 // use uuid::Uuid;
-// 
+//
 // fn bounce_no_key<B>(req: ServiceRequest) -> ServiceResponse<EitherBody<&'static str, B>> {
 //     req.into_response(
 //         HttpResponse::with_body(StatusCode::UNAUTHORIZED, "no key").map_into_left_body(),
 //     )
 // }
 // pub struct RequireKeyBuilder;
-// 
+//
 // impl<S, B> Transform<S, ServiceRequest> for RequireKeyMiddleware
 // where
 //     S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = actix_web::Error>,
@@ -33,16 +33,16 @@
 //     type Transform = RequireKeyMiddleware;
 //     type InitError = ();
 //     type Future = Ready<Result<Self::Transform, Self::InitError>>;
-// 
+//
 //     fn new_transform(&self, service: S) -> Self::Future {
 //         ready(Ok(RequireKeyMiddleware { service }))
 //     }
 // }
-// 
+//
 // pub struct RequireKeyMiddleware<S> {
 //     service: S,
 // }
-// 
+//
 // impl<S, B> Service<ServiceRequest> for RequireKeyMiddleware<S>
 // where
 //     S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = actix_web::Error>,
@@ -52,24 +52,24 @@
 //     type Response = ServiceResponse<EitherBody<&'static str, B>>;
 //     type Error = actix_web::Error;
 //     type Future = LocalBoxFuture<'static, Result<Self::Response, Self::Error>>;
-// 
+//
 //     fn poll_ready(&self, ctx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
 //         self.service.poll_ready(ctx)
 //     }
-// 
+//
 //     fn call(&self, req: ServiceRequest) -> Self::Future {
 //         let Some(Ok(auth)) = req.headers().get("authorization").map(|h| h.to_str()) else {
 //             return Box::pin(async { Ok(bounce_no_key(req)) });
 //         };
-// 
+//
 //         let Some(bearer) = auth.strip_prefix("Bearer: ") else {
 //             return Box::pin(async { Ok(bounce_no_key(req)) });
 //         };
-// 
+//
 //         let Ok(key) = bearer.parse::<Uuid>() else {
 //             return Box::pin(async { Ok(bounce_no_key(req)) });
 //         };
-// 
+//
 //         let Ok((service_id, group_id)) = req.match_info().load::<(Uuid, Uuid)>() else {
 //             return Box::pin(async {
 //                 Ok(req.into_response(
@@ -78,9 +78,9 @@
 //                 ))
 //             });
 //         };
-// 
+//
 //         let data = req.app_data::<ExtractedAppData>().unwrap().clone();
-// 
+//
 //         Box::pin(async move {
 //             let count = api_key_scopes::Entity::find()
 //                 .filter(
@@ -96,13 +96,13 @@
 //                 )
 //                 .count(&data.db)
 //                 .await?;
-// 
+//
 //             let session = req.get_session();
-// 
+//
 //             let Ok(Some(_)) = session.get::<SessionUser>("user") else {
 //                 return Box::pin(async { Ok(crate::gated::middleware::bounce_no_auth(req)) });
 //             };
-// 
+//
 //             let fut = self.service.call(req);
 //             Box::pin(async move { fut.await.map(|ok| ok.map_into_right_body()) })
 //         })

@@ -1,10 +1,10 @@
 pub(crate) mod group;
 pub(crate) mod key;
 
-use crate::gated::SessionUser;
 use crate::ExtractedAppData;
+use crate::gated::SessionUser;
 use actix_session::Session;
-use actix_web::{delete, get, post, web, Either, HttpResponse, Responder};
+use actix_web::{Either, HttpResponse, Responder, delete, get, post, web};
 use anyhow::Context;
 use entity::services;
 use sea_orm::ColumnTrait;

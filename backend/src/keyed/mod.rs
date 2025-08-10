@@ -2,7 +2,7 @@ mod middleware;
 
 use crate::{AnyhowBridge, ExtractedAppData};
 use actix_web::http::StatusCode;
-use actix_web::{post, web, Either, Responder};
+use actix_web::{Either, Responder, post, web};
 use actix_web_httpauth::extractors::bearer::BearerAuth;
 use anyhow::Context;
 use entity::sea_orm_active_enums::KeyScope;
@@ -164,7 +164,7 @@ async fn notify(
         return Ok(Either::Left(("what", StatusCode::NOT_FOUND)));
     }
 
-    let svc = services::Entity::find_by_id(service_id.clone())
+    let svc = services::Entity::find_by_id(service_id)
         .one(&data.db)
         .await
         .context("get service by id")?
@@ -198,7 +198,7 @@ async fn notify(
 
             let subscription_info = SubscriptionInfo::new(sub.endpoint, keys.p256dh, keys.auth);
 
-            let mut sig_builder =
+            let sig_builder =
                 VapidSignatureBuilder::from_base64(&svc.vapid_private, &subscription_info)
                     .context("make sig builder")?
                     .build()

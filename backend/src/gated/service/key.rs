@@ -1,25 +1,22 @@
 use crate::ExtractedAppData;
-use actix_web::{delete, get, post, web, Responder};
+use actix_web::{Responder, delete, get, post, web};
 use anyhow::Context;
 use entity::api_key_scopes;
 use entity::api_keys;
 use entity::sea_orm_active_enums::KeyScope;
-use sea_orm::prelude::DateTime;
 use sea_orm::EntityTrait;
 use sea_orm::QueryFilter;
+use sea_orm::prelude::DateTime;
 use sea_orm::{ActiveModelTrait, ActiveValue, ColumnTrait, DbErr, TransactionTrait};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[derive(Serialize, Deserialize)]
-struct KeyScope2 (
-    #[serde(with = "crate::util::active_enum")]
-    KeyScope,
-);
+struct KeyScope2(#[serde(with = "crate::util::active_enum")] KeyScope);
 
 impl From<KeyScope> for KeyScope2 {
     fn from(val: KeyScope) -> Self {
-        KeyScope2 (val)
+        KeyScope2(val)
     }
 }
 
@@ -140,7 +137,7 @@ async fn post_key(
                         key_id: ActiveValue::set(key_id),
                         service_id: ActiveValue::set(service_id),
                         group_id: ActiveValue::set(scope.group),
-                        scope: ActiveValue::set(scope.scope.into()),
+                        scope: ActiveValue::set(scope.scope),
                     })
                     .collect::<Vec<_>>();
 
@@ -161,7 +158,10 @@ async fn post_key(
         .await
         .context("fetch keys to return")?;
 
-    let one_key_and_scopes = groups.into_iter().next().context("should have created one key")?;
+    let one_key_and_scopes = groups
+        .into_iter()
+        .next()
+        .context("should have created one key")?;
 
     Ok(web::Json(ReturnedApiKey::new(one_key_and_scopes, false)))
 }
