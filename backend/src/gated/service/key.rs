@@ -7,7 +7,7 @@ use entity::sea_orm_active_enums::KeyScope;
 use sea_orm::EntityTrait;
 use sea_orm::QueryFilter;
 use sea_orm::prelude::DateTime;
-use sea_orm::{ActiveEnum, ColumnTrait};
+use sea_orm::{ColumnTrait};
 use serde::Serialize;
 use uuid::Uuid;
 

@@ -2,7 +2,7 @@
 pub mod naive_utc_rfc3339 {
     use sea_orm::prelude::{DateTime, DateTimeWithTimeZone};
     use sea_orm::sqlx::types::chrono::FixedOffset;
-    use serde::{Deserialize, Deserializer, Serializer, de};
+    use serde::{de, Deserialize, Deserializer, Serializer};
 
     pub fn serialize<S>(dt: &DateTime, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -27,7 +27,7 @@ pub mod naive_utc_rfc3339 {
 pub mod naive_utc_rfc3339_opt {
     use crate::util::naive_utc_rfc3339;
     use sea_orm::prelude::{DateTime, DateTimeWithTimeZone};
-    use serde::{Deserialize, Deserializer, Serializer, de};
+    use serde::{de, Deserialize, Deserializer, Serializer};
 
     pub fn serialize<S>(dt: &Option<DateTime>, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -54,43 +54,20 @@ pub mod naive_utc_rfc3339_opt {
 
 pub mod active_enum {
     use sea_orm::ActiveEnum;
-    use serde::{Deserialize, Deserializer, Serializer, de};
+    use serde::{de, Deserialize, Deserializer, Serializer};
 
-    trait ActiveEnumSerialize: Sized {
-        fn from_str(s: &str) -> Option<Self>;
-        fn to_string(&self) -> String;
-    }
-
-    impl<A> ActiveEnumSerialize for A
+    pub fn serialize<A, S>(active_enum: &A, serializer: S) -> Result<S::Ok, S::Error>
     where
         A: ActiveEnum<Value = String>,
-    {
-        fn from_str(s: &str) -> Option<Self> {
-            let Some(variant) = Self::values().into_iter().find(|v| v == &s) else {
-                return None;
-            };
-
-            // should always work
-            Self::try_from_value(&variant).ok()
-        }
-
-        fn to_string(&self) -> String {
-            self.to_value()
-        }
-    }
-
-    pub fn serialize<'a, A, S>(active_enum: &A, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        A: ActiveEnumSerialize,
         S: Serializer,
     {
-        let s = active_enum.to_string();
+        let s = active_enum.to_value();
         serializer.serialize_str(&s)
     }
 
     pub fn deserialize<'de, A, D>(deserializer: D) -> Result<A, D::Error>
     where
-        A: ActiveEnumSerialize + ActiveEnum<Value = String>,
+        A: ActiveEnum<Value = String>,
         D: Deserializer<'de>,
     {
         let s = String::deserialize(deserializer)?;
