@@ -127,13 +127,15 @@ impl MigrationTrait for Migration {
                 )
                 .await?;
 
-            manager.create_index(
-                Index::create()
-                    .table(GroupSubscribers::Table)
-                    .col(GroupSubscribers::ServiceId)
-                    .col(GroupSubscribers::GroupId)
-                    .to_owned()
-            ).await?;
+            manager
+                .create_index(
+                    Index::create()
+                        .table(GroupSubscribers::Table)
+                        .col(GroupSubscribers::ServiceId)
+                        .col(GroupSubscribers::GroupId)
+                        .to_owned(),
+                )
+                .await?;
 
             manager
                 .create_foreign_key(

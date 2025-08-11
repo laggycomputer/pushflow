@@ -1,7 +1,7 @@
-use crate::util::ReturnedError;
 use crate::ExtractedAppData;
+use crate::util::ReturnedError;
 use actix_web::http::StatusCode;
-use actix_web::{delete, get, patch, post, web, Either, HttpResponse, Responder};
+use actix_web::{Either, HttpResponse, Responder, delete, get, patch, post, web};
 use anyhow::Context;
 use entity::groups;
 use sea_orm::prelude::DateTime;
@@ -148,10 +148,7 @@ pub async fn patch_one_group(
     }
 
     Ok(Either::Right(web::Json::<ReturnedGroup>(
-        group
-            .try_into_model()
-            .context("group into model")?
-            .into(),
+        group.try_into_model().context("group into model")?.into(),
     )))
 }
 

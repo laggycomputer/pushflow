@@ -1,9 +1,9 @@
 mod middleware;
 
 use crate::util::ReturnedError;
-use crate::{AnyhowBridge, ExtractedAppData, BASE64_ENGINE};
+use crate::{AnyhowBridge, BASE64_ENGINE, ExtractedAppData};
 use actix_web::web::Json;
-use actix_web::{post, web, Either, Responder};
+use actix_web::{Either, Responder, post, web};
 use actix_web_httpauth::extractors::bearer::BearerAuth;
 use anyhow::Context;
 use base64::Engine;
@@ -70,7 +70,7 @@ async fn key_has_scope(
                 api_keys::Column::ServiceId
                     .eq(*service_id)
                     .and(api_keys::Column::Key.eq(key))
-                    .and(api_key_scopes::Column::GroupId.is_in(group_id.into_iter().copied()))
+                    .and(api_key_scopes::Column::GroupId.is_in(group_id.iter().copied()))
                     .and(api_key_scopes::Column::Scope.eq(scope.clone())),
             )
             .count(db)
@@ -159,7 +159,7 @@ async fn subscribe(
                         .iter()
                         .map(|group_id| group_subscribers::ActiveModel {
                             service_id: ActiveValue::Set(service_id),
-                            group_id: ActiveValue::Set(group_id.clone()),
+                            group_id: ActiveValue::Set(*group_id),
                             subscriber_id: ActiveValue::set(sub_id),
                         })
                         .collect::<Vec<_>>(),
@@ -273,7 +273,7 @@ async fn notify(
                 .send(builder.build().context("build push message")?)
                 .await
             {
-                // unsub
+                // TODO: unsub
             }
         }
     }
