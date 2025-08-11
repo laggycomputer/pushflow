@@ -194,7 +194,7 @@ async fn main() -> anyhow::Result<()> {
                         .service(keyed::notify),
                 )
         })
-        .bind(("0.0.0.0", port))
+        .bind(("::", port))
         .with_context(|| format!("bind to port {port}"))
     }?;
 
