@@ -151,6 +151,7 @@ impl MigrationTrait for Migration {
                     ForeignKey::create()
                         .from(GroupSubscribers::Table, GroupSubscribers::SubscriberId)
                         .to(Subscribers::Table, Subscribers::SubscriberId)
+                        .on_delete(ForeignKeyAction::Cascade)
                         .to_owned(),
                 )
                 .await?;
