@@ -8,10 +8,10 @@ use actix_web_httpauth::extractors::bearer::BearerAuth;
 use anyhow::Context;
 use base64::Engine;
 use entity::sea_orm_active_enums::KeyScope;
-use entity::{api_key_scopes, api_keys, group_subscribers, services, subscribers};
+use entity::{api_key_scopes, api_keys, group_subscribers, groups, services, subscribers};
 use migration::sea_query;
 use sea_orm::sea_query::OnConflict;
-use sea_orm::{ActiveValue, PaginatorTrait, QueryTrait};
+use sea_orm::{ActiveModelTrait, ActiveValue, IntoActiveModel, PaginatorTrait, QueryTrait};
 use sea_orm::{ColumnTrait, TransactionTrait};
 use sea_orm::{EntityTrait, QueryFilter};
 use serde::{Deserialize, Serialize};
@@ -52,7 +52,7 @@ async fn key_has_scope(
     group_id: &[Uuid],
     scope: KeyScope,
 ) -> crate::Result<bool> {
-    Ok(api_key_scopes::Entity::find()
+    let check = api_key_scopes::Entity::find()
         .inner_join(api_keys::Entity)
         .filter(
             api_keys::Column::ServiceId
@@ -75,10 +75,23 @@ async fn key_has_scope(
             )
             .count(db)
             .await?
-            == group_id.len() as u64)
+            == group_id.len() as u64;
+
+    let mut api_key = api_keys::Entity::find()
+        .filter(api_keys::Column::Key.eq(key))
+        .one(db)
+        .await
+        .context("get key to update last_used")?
+        .context("key to update last_used DNE")?
+        .into_active_model();
+
+    api_key.last_used =
+        ActiveValue::Set(Some(sea_orm::sqlx::types::chrono::Utc::now().naive_utc()));
+    api_key.update(db).await.context("push update last_used")?;
+
+    Ok(check)
 }
 
-// TODO: set last_used
 #[post("/service/{service_id}/subscribe")]
 async fn subscribe(
     data: ExtractedAppData,
@@ -201,6 +214,20 @@ async fn notify(
         .context("get service by id")?
         .context("no service by id")?;
 
+    let mut group = groups::Entity::find_by_id((service_id, group_id))
+        .one(&data.db)
+        .await
+        .context("get group to update last_notified")?
+        .context("group to update last_notified DNE")?
+        .into_active_model();
+
+    group.last_notified =
+        ActiveValue::Set(Some(sea_orm::sqlx::types::chrono::Utc::now().naive_utc()));
+    group
+        .update(&data.db)
+        .await
+        .context("push update last_notified")?;
+
     let mut it = group_subscribers::Entity::find()
         .filter(
             group_subscribers::Column::ServiceId
@@ -241,7 +268,6 @@ async fn notify(
             builder.set_vapid_signature(sig_builder);
 
             // TODO: topic, urgency
-            // TODO: set last_notified
 
             if let Err(_) = client
                 .send(builder.build().context("build push message")?)

@@ -3,14 +3,13 @@ use crate::ExtractedAppData;
 use actix_web::http::StatusCode;
 use actix_web::{delete, get, patch, post, web, Either, HttpResponse, Responder};
 use anyhow::Context;
-use entity::{groups, services};
+use entity::groups;
 use sea_orm::prelude::DateTime;
 use sea_orm::{ActiveModelTrait, IntoActiveModel, QueryFilter, TryIntoModel};
 use sea_orm::{ActiveValue, ColumnTrait};
 use sea_orm::{EntityTrait, SqlErr};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use crate::gated::service::{PatchServiceBody, ReturnedService};
 
 #[derive(Serialize)]
 struct ReturnedGroup {
