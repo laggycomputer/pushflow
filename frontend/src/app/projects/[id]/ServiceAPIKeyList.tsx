@@ -3,7 +3,7 @@ import Card, { CardHeader } from "@/app/components/Card";
 import DataList, { EmptyListMessage } from "@/app/components/DataList";
 import ApiKey from "@/app/components/ServiceApiKey";
 import { ServiceApiKey } from "@/types";
-import { Button, IconButton } from "@mui/material";
+import { IconButton } from "@mui/material";
 
 import AddIcon from '@mui/icons-material/Add';
 import { DialogName } from "@/helpers/dialog";
@@ -11,11 +11,10 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import CreateApiKeyDialog from "@/app/components/dialogs/CreateApiKeyDialog";
 import { useState } from "react";
 import ShowApiKeyDialog from "@/app/components/dialogs/ShowApiKeyDialog";
-import { registerWorker, subscribeToNotifications } from "@/helpers/webpush-test";
 import { prependApiKey } from "@/store/slices/serviceSlice";
 import DeleteApiKeyDialog from "@/app/components/dialogs/DeleteApiKeyDialog";
 import { openDialog } from "@/store/slices/dialogSlice";
-import ApiKeyCodeSnippetDialog from "@/app/components/dialogs/ApiKeyCodeSnippetDialog";
+import ApiKeyCodeSnippetDialog from "@/app/components/dialogs/CodeSnippetDialog";
 
 interface ServiceAPIKeyListProps {
   serviceId: string;
@@ -37,11 +36,6 @@ export default function ServiceAPIKeyList ({ serviceId, apiKeys: initialKeys }: 
 
     setCreatedApiKey(apiKey)
     dispatch(openDialog(DialogName.ShowServiceApiKeyPopup))
-  }
-
-  const handleTestClick = async () => {
-    await registerWorker()
-    subscribeToNotifications(serviceId, ['0198972d-6fa0-7ff0-b3b2-86a46ecfbb73'])
   }
 
   return <Card className="list-container">

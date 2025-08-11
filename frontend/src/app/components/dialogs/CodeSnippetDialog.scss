@@ -1,0 +1,28 @@
+#code-snippet-popup {
+  .card-inner {
+    max-height: 80vh;
+  }
+  .copy-box {
+    margin-block: 6px 12px;
+  }
+
+  h3 {
+    margin-block: 12px 8px;
+    &:nth-child(2) { margin-top: 0; }
+  }
+
+  .MuiFormControl-root {
+    margin-bottom: 12px;
+  }
+
+  .actions-left {
+    justify-content: start;
+    padding: 10px 0 12px;
+  }
+}
+
+li.MuiMenuItem-root.csp-item {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}

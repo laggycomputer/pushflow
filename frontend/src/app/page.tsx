@@ -10,7 +10,7 @@ function ServiceCard ({ data: { name, service_id: id } }: { data: Service }) {
   return <Link href={'/projects/' + id}>
     <Card>
       <CardHeader text={name} />
-      <p>some text, some text</p>
+      <p>This is a service!</p>
     </Card>
   </Link>
 }

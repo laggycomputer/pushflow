@@ -1,22 +1,16 @@
-const applicationServerKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
-const testApiKey = process.env.NEXT_PUBLIC_TEST_API_KEY
-
-export async function subscribeToNotifications (serviceId: string, groups: string[]) {
+export async function subscribeToNotifications (serviceId: string, groups: string[], applicationServerKey: string, apiKey: string) {
   const worker = await navigator.serviceWorker.getRegistration()
   const status = await Notification.requestPermission()
   if (!worker || status !== 'granted') return console.error('Permission not granted')
 
-  // TEMP: unsubscribe if needed
   const subscription = await worker.pushManager.getSubscription()
   if (subscription) await subscription.unsubscribe()
-
-  console.log(applicationServerKey, subscription)
 
   const headers = { 'Content-Type': 'application/json' }
   const details = await worker.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey })
   const body = JSON.stringify({
     subscription: details.toJSON(),
-    apiKey: testApiKey,
+    apiKey,
     groups
   })
   const url = `/api/services/${serviceId}/subscribe`

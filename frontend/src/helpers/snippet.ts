@@ -34,12 +34,13 @@ export function getServiceWorkerRegistrationCode () {
 }
 
 const subscribeBaseCode = `
-async function subscribeToNotifications (serviceId: string, groups: string[], forceResubscribe: boolean) {
+async function subscribeToNotifications (forceResubscribe: boolean) {
   const baseUrl = '$$APPLICATION_DOMAIN$$'
   const applicationServerKey = '$$APPLICATION_SERVER_KEY$$'
   const serviceId = '$$APPLICATION_SERVICE_KEY$$'
+  const groups = $$SELECTED_GROUPS$$
 
-  const apiKey = '$$APPLICATION_API_KEY$$'
+  const apiKey = 'YOUR_API_KEY'
 
   const worker = await navigator.serviceWorker.getRegistration()
   const status = await Notification.requestPermission()
@@ -57,10 +58,10 @@ async function subscribeToNotifications (serviceId: string, groups: string[], fo
 }
 `.trim()
 
-export function getSubscribeCode (serviceId: string, apiKey: string, vapidPublicKey: string) {
+export function getSubscribeCode (serviceId: string, vapidPublicKey: string, groupIds: string[]) {
   return subscribeBaseCode
     .replace('$$APPLICATION_DOMAIN$$', config.NEXT_PUBLIC_APP_DOMAIN)
     .replace('$$APPLICATION_SERVER_KEY$$', vapidPublicKey)
-    .replace('$$APPLICATION_API_KEY$$', apiKey)
+    .replace('$$SELECTED_GROUPS$$', JSON.stringify(groupIds).replaceAll('","', '", "'))
     .replace('$$APPLICATION_SERVICE_KEY$$', serviceId)
 }

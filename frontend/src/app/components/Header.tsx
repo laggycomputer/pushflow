@@ -26,7 +26,7 @@ export default function Header ({ user }: { user: User | null }) {
   const openCreateNewServiceForm = () => dispatch(openDialog(DialogName.NewServicePopup))
 
   const showSnippetPopup = () => {
-    dispatch(openDialog(DialogName.ShowServiceApiKeySnippetPopup))
+    dispatch(openDialog(DialogName.ShowServiceCodeSnippetPopup))
   }
 
   return <div className="app-header">
