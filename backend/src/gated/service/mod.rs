@@ -4,12 +4,13 @@ pub(crate) mod key;
 use crate::gated::SessionUser;
 use crate::ExtractedAppData;
 use actix_session::Session;
-use actix_web::{delete, get, post, web, Either, HttpResponse, Responder};
+use actix_web::http::StatusCode;
+use actix_web::{delete, get, patch, post, web, Either, HttpResponse, Responder};
 use anyhow::Context;
 use entity::{group_subscribers, services, subscribers};
-use sea_orm::ColumnTrait;
-use sea_orm::EntityTrait;
 use sea_orm::QueryFilter;
+use sea_orm::{ActiveModelTrait, EntityTrait, SqlErr, TryIntoModel};
+use sea_orm::{ActiveValue, ColumnTrait, IntoActiveModel};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -98,6 +99,47 @@ pub async fn get_one_service(
         None => Either::Left(HttpResponse::NotFound()),
         Some(service) => Either::Right(web::Json::<ReturnedService>(service.clone().into())),
     })
+}
+
+#[derive(Deserialize)]
+struct PatchServiceBody {
+    name: Option<String>,
+}
+
+#[patch("")]
+pub async fn patch_one_service(
+    data: ExtractedAppData,
+    service_id: web::Path<Uuid>,
+    body: web::Json<PatchServiceBody>,
+) -> crate::Result<impl Responder> {
+    let service_id = service_id.into_inner();
+    let body = body.into_inner();
+
+    let mut service = services::Entity::find_by_id(service_id)
+        .one(&data.db)
+        .await
+        .context("get service to patch")?
+        .context("service to patch DNE")?
+        .into_active_model();
+
+    if let Some(new_name) = body.name {
+        service.name = ActiveValue::Set(new_name);
+    }
+
+    match service.clone().update(&data.db).await {
+        Ok(_) => {}
+        Err(e) if matches!(e.sql_err(), Some(SqlErr::UniqueConstraintViolation(_))) => {
+            return Ok(Either::Left(("dup name", StatusCode::CONFLICT)));
+        }
+        Err(other) => Err(other).context("update service")?,
+    }
+
+    Ok(Either::Right(web::Json::<ReturnedService>(
+        service
+            .try_into_model()
+            .context("service into model")?
+            .into(),
+    )))
 }
 
 #[delete("")]
