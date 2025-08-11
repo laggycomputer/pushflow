@@ -277,8 +277,8 @@ impl MigrationTrait for Migration {
                     ForeignKey::create()
                         .from(ApiKeyScopes::Table, ApiKeyScopes::GroupId)
                         .from(ApiKeyScopes::Table, ApiKeyScopes::ServiceId)
-                        .to(Groups::Table, Groups::ServiceId)
                         .to(Groups::Table, Groups::GroupId)
+                        .to(Groups::Table, Groups::ServiceId)
                         .on_delete(ForeignKeyAction::Cascade)
                         .to_owned(),
                 )
