@@ -36,7 +36,7 @@ export default function ApiKeyCodeSnippetDialog () {
     subscribeToNotifications(serviceId, groupIds, vapidPublicKey, apiKey)
   }
 
-  const handleGroupSelectionChange = (event: any) => {
+  const handleGroupSelectionChange = (event) => {
     setSelectedGroups(event.target.value)
   }
   
@@ -68,9 +68,9 @@ export default function ApiKeyCodeSnippetDialog () {
           label="Groups"
           renderValue={() => selectedGroups.map(g => g.name).join(', ')}
           multiple
-          onChange={handleGroupSelectionChange}
+          onChange={e => setSelectedGroups(e.target.value as ServiceGroup[])}
         >
-          {groups.map(g => <MenuItem key={g.group_id} value={g as any} className="csp-item">
+          {groups.map(g => <MenuItem key={g.group_id} value={g as unknown as string} className="csp-item">
             {selectedGroups.includes(g) ? <CheckIcon />: <Icon />}
             {g.name}
           </MenuItem>)}
@@ -100,7 +100,7 @@ export default function ApiKeyCodeSnippetDialog () {
           label="Group"
           onChange={event => setNotifyGroup(event.target.value as ServiceGroup | '')}
         >
-          {groups.map(g => <MenuItem key={g.group_id} value={g as any} className="csp-item">
+          {groups.map(g => <MenuItem key={g.group_id} value={g as unknown as string} className="csp-item">
             {g.name}
           </MenuItem>)}
         </Select>
