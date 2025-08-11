@@ -43,3 +43,21 @@ export async function deleteApiKey (serviceId: string, keyId: string): Promise<b
 
   return true
 }
+
+export async function updateApiKey (serviceId: string, keyId: string, name: string, selectedScopes: string[]): Promise<boolean> {
+  const headers = await getSessionHeaders()
+  if (!headers) return false
+  
+  headers['Content-Type'] = 'application/json'
+
+  const url = `${config.BACKEND_URL}/gated/service/${encodeURIComponent(serviceId)}/key/${encodeURIComponent(keyId)}`
+  const scopes = selectedScopes.map(s => ({ scope: s }))
+  const body = JSON.stringify({ name, scopes })
+
+  const response = await fetch(url, { headers, body, method: 'PATCH' })
+    .then(x => x.text())
+    .catch(err => console.error(err))
+  console.log(response, keyId)
+
+  return true
+}

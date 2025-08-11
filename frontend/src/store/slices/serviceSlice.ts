@@ -38,6 +38,10 @@ const serviceSlice = createSlice({
     removeApiKey: (state, action: PayloadAction<ServiceApiKey>) => {
       const index = state.apiKeys.findIndex(key => key.key_preview === action.payload.key_preview)
       if (index > -1) state.apiKeys.splice(index, 1)
+      },
+    editApiKey: (state, action: PayloadAction<ServiceApiKey>) => {
+      const apiKey = state.apiKeys.find(key => key.key_preview === action.payload.key_preview)
+      if (apiKey) Object.assign(apiKey, action.payload)
     },
     addGroup: (state, action: PayloadAction<ServiceGroup>) => {
       state.groups.push(action.payload)
@@ -46,13 +50,32 @@ const serviceSlice = createSlice({
       const index = state.groups.findIndex(g => g.group_id === action.payload.group_id)
       if (index > -1) state.groups.splice(index, 1)
     },
+    editGroup: (state, action: PayloadAction<ServiceGroup>) => {
+      const group = state.groups.find(g => g.group_id === action.payload.group_id)
+      if (group) Object.assign(group, action.payload)
+    },
     removeSubscriber: (state, action: PayloadAction<ServiceSubscriber>) => {
       const index = state.subscribers.findIndex(s => s.subscriber_id === action.payload.subscriber_id)
       if (index > -1) state.subscribers.splice(index, 1)
+    },
+    editSubscriber: (state, action: PayloadAction<ServiceSubscriber>) => {
+      const sub = state.subscribers.findIndex(s => s.subscriber_id === action.payload.subscriber_id)
+      if (sub) Object.assign(sub, action.payload)
     }
   }
 });
 
-export const { resetState, setInitialData, prependApiKey, removeApiKey, addGroup, removeGroup, removeSubscriber } = serviceSlice.actions;
+export const {
+  resetState,
+  setInitialData,
+  prependApiKey,
+  removeApiKey,
+  editApiKey,
+  addGroup,
+  removeGroup,
+  editGroup,
+  removeSubscriber,
+  editSubscriber
+} = serviceSlice.actions;
 
 export default serviceSlice.reducer;

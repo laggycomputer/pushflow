@@ -26,3 +26,20 @@ export async function deleteSubscriber (serviceId: string, subscriberId: string)
 
   return true
 }
+
+export async function updateSubscriber (serviceId: string, subscriberId: string, name: string): Promise<boolean> {
+  const headers = await getSessionHeaders()
+  if (!headers) return false
+  
+  headers['Content-Type'] = 'application/json'
+
+  const url = `${config.BACKEND_URL}/gated/service/${encodeURIComponent(serviceId)}/subscriber/${encodeURIComponent(subscriberId)}`
+  const body = JSON.stringify({ name })
+
+  const response = await fetch(url, { headers, body, method: 'PATCH' })
+    .then(x => x.text())
+    .catch(err => console.error(err))
+  console.log(response)
+
+  return true
+}

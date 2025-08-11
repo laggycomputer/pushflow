@@ -13,7 +13,7 @@ export default function DeleteApiKeyDialog () {
   const isOpen = useAppSelector(state => state.dialog.activeDialog === DialogName.DeleteServiceApiKeyPopup)
   const serviceId = useAppSelector(state => state.service.currentServiceId)
   const keyId = useAppSelector(state => state.dialog.key)
-  const apiKey = useAppSelector(state => state.service.apiKeys.find(k => k.key_preview === keyId))
+  const apiKey = useAppSelector(state => state.service.apiKeys.find(k => k.key_id === keyId))
   
   const [submitting, setSubmitting] = useState(false)
   
