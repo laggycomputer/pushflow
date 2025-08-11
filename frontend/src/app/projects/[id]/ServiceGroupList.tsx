@@ -27,7 +27,8 @@ export default function ServiceGroupList ({ serviceId, groups: intialGroups }: S
 
   const handleNewGroup = (group: ServiceGroup) => dispatch(addGroup(group))
   
-  const groupHeaderText = pluralize(groups.length + 1, 'Groups', 'Group')
+  /** @todo add service alerts */
+  const groupHeaderText = pluralize(groups.length /* + 1 */, 'Groups', 'Group')
 
   return <Card>
     <CardHeader text={groupHeaderText}>
@@ -36,11 +37,11 @@ export default function ServiceGroupList ({ serviceId, groups: intialGroups }: S
       </IconButton>
     </CardHeader>
     <DataList>
-      <Group
+      {/* <Group
         name="Service Alerts"
         lastNotified={new Date()}
         isService
-      />
+      /> */}
       {groups.map(g => <Group
         key={g.group_id}
         groupId={g.group_id}
