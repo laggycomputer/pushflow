@@ -1,6 +1,6 @@
 'use client';
 import Card, { CardHeader } from "@/app/components/Card";
-import DataList from "@/app/components/DataList";
+import DataList, { EmptyListMessage } from "@/app/components/DataList";
 import Group from "@/app/components/ServiceGroup";
 import { ServiceGroup } from "@/types";
 import { IconButton } from "@mui/material";
@@ -46,9 +46,9 @@ export default function ServiceGroupList ({ serviceId, groups: intialGroups }: S
         key={g.group_id}
         groupId={g.group_id}
         name={g.name}
-        userCount={2}
-        lastNotified={new Date()}
+        lastNotified={g.last_notified}
       />)}
+      <EmptyListMessage list={groups} message="You have no groups yet!"/>
     </DataList>
     <CreateGroupDialog serviceId={serviceId} onCreate={handleNewGroup} />
     <DeleteGroupDialog />

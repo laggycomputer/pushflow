@@ -46,7 +46,7 @@ export default function ServiceAPIKeyList ({ serviceId, apiKeys: initialKeys }: 
     </CardHeader>
     <DataList>
       {apiKeys.map(k => <ApiKey key={k.key_preview} data={k} />)}
-      <EmptyListMessage list={apiKeys} message="You have no API Keys yet!"/>
+      <EmptyListMessage list={apiKeys} message="You have no API keys yet!"/>
     </DataList>
     <CreateApiKeyDialog serviceId={serviceId} onCreate={handleCreateKey} />
     <ShowApiKeyDialog apiKey={createdApiKey} />

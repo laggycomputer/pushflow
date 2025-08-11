@@ -1,6 +1,6 @@
 'use client';
 import Card, { CardHeader } from "@/app/components/Card";
-import DataList from "@/app/components/DataList";
+import DataList, { EmptyListMessage } from "@/app/components/DataList";
 import DeleteSubscriberDialog from "@/app/components/dialogs/DeleteSubscriberDialog";
 import EditSubscriberDialog from "@/app/components/dialogs/EditSubscriberDialog";
 import SubscriptionUser from "@/app/components/SubscriptionUser";
@@ -27,6 +27,7 @@ export default function ServiceSubscriberList ({ serviceId, subscribers: initial
         createdAt={new Date(s.created_at ?? Date.now())}
         groupCount={s.groups.length}
       />)}
+      <EmptyListMessage list={subscribers} message="You have no subscribers yet!"/>
     </DataList>
     <EditSubscriberDialog />
     <DeleteSubscriberDialog />
