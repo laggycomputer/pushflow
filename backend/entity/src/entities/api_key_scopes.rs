@@ -26,8 +26,8 @@ pub enum Relation {
     ApiKeys,
     #[sea_orm(
         belongs_to = "super::groups::Entity",
-        from = "(Column::GroupId, Column::ServiceId)",
-        to = "(super::groups::Column::GroupId, super::groups::Column::ServiceId)",
+        from = "(Column::ServiceId, Column::GroupId)",
+        to = "(super::groups::Column::ServiceId, super::groups::Column::GroupId)",
         on_update = "NoAction",
         on_delete = "Cascade"
     )]

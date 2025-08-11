@@ -11,15 +11,13 @@ use actix_web::Responder;
 use actix_web::cookie::Key;
 use actix_web::{App, HttpServer, ResponseError, get, web};
 use anyhow::Context;
+use base64::engine::GeneralPurpose;
 use deadpool_redis::{Config, Runtime};
 use gated::middleware::RequireAuthBuilder;
 use migration::{Migrator, MigratorTrait};
 use std::ffi::OsString;
 use std::fmt::{Display, Formatter};
 use std::ops::Deref;
-use base64::engine::GeneralPurpose;
-use sea_orm::prelude::async_trait::async_trait;
-use web_push::{request_builder, WebPushClient, WebPushError, WebPushMessage};
 
 const FIXED_SESSION_KEY: [u8; 64] = [
     0xe9, 0xde, 0x52, 0x01, 0x07, 0xd0, 0xf9, 0x16, 0xe3, 0x9a, 0x52, 0x39, 0x24, 0x68, 0xfd, 0xec,
@@ -170,6 +168,7 @@ async fn main() -> anyhow::Result<()> {
                                         .service(gated::service::patch_one_service)
                                         .service(gated::service::delete_one_service)
                                         .service(gated::service::get_service_subscriber)
+                                        .service(gated::service::delete_service_subscriber)
                                         .service(
                                             web::scope("/group")
                                                 .service(gated::service::group::get_all_groups)

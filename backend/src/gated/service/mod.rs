@@ -1,12 +1,12 @@
 pub(crate) mod group;
 pub(crate) mod key;
 
+use crate::ExtractedAppData;
 use crate::gated::SessionUser;
 use crate::util::ReturnedError;
-use crate::ExtractedAppData;
 use actix_session::Session;
 use actix_web::http::StatusCode;
-use actix_web::{delete, get, patch, post, web, Either, HttpResponse, Responder};
+use actix_web::{Either, HttpResponse, Responder, delete, get, patch, post, web};
 use anyhow::Context;
 use entity::{group_subscribers, services, subscribers};
 use sea_orm::QueryFilter;
@@ -176,7 +176,7 @@ impl ReturnedSubscriber {
         models: (subscribers::Model, Vec<group_subscribers::Model>),
     ) -> ReturnedSubscriber {
         Self {
-            service_id: service_id.clone(),
+            service_id: *service_id,
             subscriber_id: models.0.subscriber_id,
             name: models.0.name,
             email: models.0.email,
@@ -209,4 +209,27 @@ pub async fn get_service_subscriber(
             .map(|m| ReturnedSubscriber::new(&service_id, m))
             .collect::<Vec<_>>(),
     ))
+}
+
+#[derive(Deserialize)]
+pub struct DeleteSubscriberBody {
+    endpoint: String,
+}
+
+#[delete("/subscriber")]
+pub async fn delete_service_subscriber(
+    data: ExtractedAppData,
+    body: web::Json<DeleteSubscriberBody>,
+) -> crate::Result<impl Responder> {
+    let body = body.into_inner();
+
+    subscribers::Entity::delete(subscribers::ActiveModel {
+        endpoint: ActiveValue::Set(body.endpoint),
+        ..Default::default()
+    })
+    .exec(&data.db)
+    .await
+    .context("delete subscriber by endpoint")?;
+
+    Ok("ok deleted")
 }

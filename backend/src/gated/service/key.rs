@@ -1,7 +1,7 @@
 use crate::util::ReturnedError;
-use crate::{ExtractedAppData, BASE64_ENGINE};
+use crate::{BASE64_ENGINE, ExtractedAppData};
 use actix_web::http::StatusCode;
-use actix_web::{delete, get, patch, post, web, Either, Responder};
+use actix_web::{Either, Responder, delete, get, patch, post, web};
 use anyhow::Context;
 use base64::Engine;
 use entity::api_key_scopes;
