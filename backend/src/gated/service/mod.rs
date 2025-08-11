@@ -225,3 +225,42 @@ pub async fn delete_service_subscriber(
 
     Ok("ok deleted")
 }
+
+#[derive(Deserialize)]
+struct PatchSubscriberBody {
+    name: Option<String>,
+}
+
+#[patch("/subscriber/{subscriber_id}")]
+pub async fn patch_one_subscriber(
+    data: ExtractedAppData,
+    path: web::Path<(Uuid, Uuid)>,
+    body: web::Json<PatchSubscriberBody>,
+) -> crate::Result<impl Responder> {
+    let (service_id, subscriber_id) = path.into_inner();
+    let body = body.into_inner();
+
+    let mut subscriber = subscribers::Entity::find_by_id(subscriber_id)
+        .one(&data.db)
+        .await
+        .context("get subscriber to patch")?
+        .context("subscriber to patch DNE")?
+        .into_active_model();
+
+    if let Some(new_name) = body.name {
+        subscriber.name = ActiveValue::Set(Some(new_name));
+    }
+
+    match subscriber.clone().update(&data.db).await {
+        Ok(_) => {}
+        Err(e) if matches!(e.sql_err(), Some(SqlErr::UniqueConstraintViolation(_))) => {
+            return Ok(Either::Left((
+                web::Json::<ReturnedError>("dup name".into()),
+                StatusCode::CONFLICT,
+            )));
+        }
+        Err(other) => Err(other).context("update subscriber")?,
+    }
+
+    Ok(Either::Right("ok"))
+}

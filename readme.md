@@ -43,7 +43,10 @@ The `.env.example` files are meant to ease local development/deployment and are 
 environment variables out of the box.
 
 What you do need to do:
+
 * You must set up Google OAuth: https://developers.google.com/identity/protocols/oauth2/web-server#enable-apis
+    * You must set (akin to Railway's variable syntax) `http://${{frontend.RAILWAY_PUBLIC_DOMAIN}}/api/login/google` as
+      an authorized redirect URI.
 * **You should set `$JWT_SECRET` to a strong passphrase.** This passphrase protects all session creation on the
   dashboard. Failure to do so may result in CSRF attacks by guessing of certain secrets in the OAuth flow.
 
