@@ -1,7 +1,8 @@
 mod middleware;
 
+use crate::util::ReturnedError;
 use crate::{AnyhowBridge, ExtractedAppData, BASE64_ENGINE};
-use actix_web::http::StatusCode;
+use actix_web::web::Json;
 use actix_web::{post, web, Either, Responder};
 use actix_web_httpauth::extractors::bearer::BearerAuth;
 use anyhow::Context;
@@ -19,6 +20,10 @@ use web_push::{
     IsahcWebPushClient, SubscriptionInfo, VapidSignatureBuilder, WebPushClient,
     WebPushMessageBuilder,
 };
+
+fn bounce_bad_key<R>() -> Either<Json<ReturnedError>, R> {
+    Either::Left(web::Json::<ReturnedError>("dup name".into()))
+}
 
 #[derive(Serialize, Deserialize, Debug)]
 struct PostSubscribeBodyKeys {
@@ -82,7 +87,7 @@ async fn subscribe(
     body: web::Json<PostSubscribeBody>,
 ) -> crate::Result<impl Responder> {
     let Ok(auth) = BASE64_ENGINE.decode(auth.token()) else {
-        return Ok(Either::Left(("what", StatusCode::NOT_FOUND)));
+        return Ok(bounce_bad_key());
     };
 
     let service_id = service_id.into_inner();
@@ -90,7 +95,7 @@ async fn subscribe(
 
     if !key_has_scope(&data.db, &auth, &service_id, &body.groups, KeyScope::Sub).await? {
         // disguise this
-        return Ok(Either::Left(("what", StatusCode::NOT_FOUND)));
+        return Ok(bounce_bad_key());
     }
 
     // TODO: encrypt the endpoint and creds
@@ -179,7 +184,7 @@ async fn notify(
     body: web::Json<PostNotifyBody>,
 ) -> crate::Result<impl Responder> {
     let Ok(auth) = BASE64_ENGINE.decode(auth.token()) else {
-        return Ok(Either::Left(("what", StatusCode::NOT_FOUND)));
+        return Ok(bounce_bad_key());
     };
 
     let (service_id, group_id) = params.into_inner();
@@ -187,7 +192,7 @@ async fn notify(
 
     if !key_has_scope(&data.db, &auth, &service_id, &[group_id], KeyScope::Notify).await? {
         // disguise this
-        return Ok(Either::Left(("what", StatusCode::NOT_FOUND)));
+        return Ok(bounce_bad_key());
     }
 
     let svc = services::Entity::find_by_id(service_id)

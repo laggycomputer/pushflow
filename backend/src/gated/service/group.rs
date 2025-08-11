@@ -1,10 +1,11 @@
+use crate::util::ReturnedError;
 use crate::ExtractedAppData;
 use actix_web::http::StatusCode;
-use actix_web::{Either, HttpResponse, Responder, delete, get, post, web};
+use actix_web::{delete, get, post, web, Either, HttpResponse, Responder};
 use anyhow::Context;
 use entity::groups;
-use sea_orm::QueryFilter;
 use sea_orm::prelude::DateTime;
+use sea_orm::QueryFilter;
 use sea_orm::{ActiveValue, ColumnTrait};
 use sea_orm::{EntityTrait, SqlErr};
 use serde::{Deserialize, Serialize};
@@ -75,7 +76,10 @@ async fn post_group(
     {
         Ok(ent) => ent,
         Err(e) if matches!(e.sql_err(), Some(SqlErr::UniqueConstraintViolation(_))) => {
-            return Ok(Either::Left(("dup name", StatusCode::CONFLICT)));
+            return Ok(Either::Left((
+                web::Json::<ReturnedError>("dup name".into()),
+                StatusCode::CONFLICT,
+            )));
         }
         Err(e) => return Err(e).context("insert new group")?,
     };

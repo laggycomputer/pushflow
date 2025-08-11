@@ -13,6 +13,7 @@ use sea_orm::{EntityTrait, SqlErr, TransactionError};
 use serde::{Deserialize, Serialize};
 use sha2::Digest;
 use uuid::Uuid;
+use crate::util::ReturnedError;
 
 #[derive(Serialize, Deserialize)]
 struct KeyScope2(#[serde(with = "crate::util::active_enum")] KeyScope);
@@ -67,7 +68,7 @@ impl ReturnedApiKey {
             name: val.0.name,
             key_preview: match trunc_key {
                 false => key,
-                true => { 
+                true => {
                     key.truncate(24);
                     key
                 },
@@ -168,7 +169,8 @@ async fn post_key(
         Err(TransactionError::Transaction(e))
             if matches!(e.sql_err(), Some(SqlErr::UniqueConstraintViolation(_))) =>
         {
-            return Ok(Either::Left(("dup name", StatusCode::CONFLICT)));
+            return Ok(Either::Left((                web::Json::<ReturnedError>("dup name".into()),
+                                    StatusCode::CONFLICT)));
         }
         Err(other) => Err(other).context("insert key and scopes")?,
     };

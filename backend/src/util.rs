@@ -1,8 +1,26 @@
+use serde::Serialize;
+
+#[derive(Serialize)]
+pub struct ReturnedError {
+    error: String,
+}
+
+impl<T> From<T> for ReturnedError
+where
+    T: ToString,
+{
+    fn from(value: T) -> Self {
+        Self {
+            error: value.to_string(),
+        }
+    }
+}
+
 // turn chrono NaiveDateTime (as sea_orm::prelude::DateTime) into ISO 8601 and back
 pub mod naive_utc_rfc3339 {
     use sea_orm::prelude::{DateTime, DateTimeWithTimeZone};
     use sea_orm::sqlx::types::chrono::FixedOffset;
-    use serde::{Deserialize, Deserializer, Serializer, de};
+    use serde::{de, Deserialize, Deserializer, Serializer};
 
     pub fn serialize<S>(dt: &DateTime, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -27,7 +45,7 @@ pub mod naive_utc_rfc3339 {
 pub mod naive_utc_rfc3339_opt {
     use crate::util::naive_utc_rfc3339;
     use sea_orm::prelude::{DateTime, DateTimeWithTimeZone};
-    use serde::{Deserialize, Deserializer, Serializer, de};
+    use serde::{de, Deserialize, Deserializer, Serializer};
 
     pub fn serialize<S>(dt: &Option<DateTime>, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -54,7 +72,7 @@ pub mod naive_utc_rfc3339_opt {
 
 pub mod active_enum {
     use sea_orm::ActiveEnum;
-    use serde::{Deserialize, Deserializer, Serializer, de};
+    use serde::{de, Deserialize, Deserializer, Serializer};
 
     pub fn serialize<A, S>(active_enum: &A, serializer: S) -> Result<S::Ok, S::Error>
     where

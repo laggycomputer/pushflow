@@ -2,6 +2,7 @@ pub(crate) mod group;
 pub(crate) mod key;
 
 use crate::gated::SessionUser;
+use crate::util::ReturnedError;
 use crate::ExtractedAppData;
 use actix_session::Session;
 use actix_web::http::StatusCode;
@@ -129,7 +130,10 @@ pub async fn patch_one_service(
     match service.clone().update(&data.db).await {
         Ok(_) => {}
         Err(e) if matches!(e.sql_err(), Some(SqlErr::UniqueConstraintViolation(_))) => {
-            return Ok(Either::Left(("dup name", StatusCode::CONFLICT)));
+            return Ok(Either::Left((
+                web::Json::<ReturnedError>("dup name".into()),
+                StatusCode::CONFLICT,
+            )));
         }
         Err(other) => Err(other).context("update service")?,
     }
