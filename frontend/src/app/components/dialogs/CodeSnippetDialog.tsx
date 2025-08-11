@@ -36,10 +36,6 @@ export default function ApiKeyCodeSnippetDialog () {
     subscribeToNotifications(serviceId, groupIds, vapidPublicKey, apiKey)
   }
 
-  const handleGroupSelectionChange = (event) => {
-    setSelectedGroups(event.target.value)
-  }
-  
   return <Dialog open={isOpen} onClose={handleClose} id="code-snippet-popup">
     <Card className="list-container">
       <CardHeader text="Integrate API Key" />
