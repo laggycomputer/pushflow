@@ -195,7 +195,6 @@ pub async fn get_service_subscribers(
     let service_id = service_id.into_inner();
 
     let all_subscribers = subscribers::Entity::find()
-        .inner_join(group_subscribers::Entity)
         .filter(group_subscribers::Column::ServiceId.eq(service_id))
         .find_with_related(group_subscribers::Entity)
         .all(&data.db)
