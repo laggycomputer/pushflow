@@ -21,7 +21,7 @@ export default function ServiceSubscriberList ({ serviceId, subscribers: initial
       {subscribers.map(s => <SubscriptionUser
         key={s.subscriber_id}
         displayName={s.name ?? s.subscriber_id}
-        createdAt={new Date()}
+        createdAt={new Date(s.created_at ?? Date.now())}
         groupCount={s.groups.length}
       />)}
     </DataList>

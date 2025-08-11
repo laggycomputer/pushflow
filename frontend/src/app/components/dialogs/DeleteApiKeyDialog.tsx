@@ -25,7 +25,7 @@ export default function DeleteApiKeyDialog () {
 
   const handleDelete = async () => {
     setSubmitting(true)
-    const success = await deleteApiKey(serviceId, apiKey.key_preview)
+    const success = await deleteApiKey(serviceId, apiKey.key_id)
     setSubmitting(false)
     if (success) {
       dispatch(closeDialog())
@@ -40,8 +40,9 @@ export default function DeleteApiKeyDialog () {
     <Card>
       <CardHeader text="Deleting API Key" />
       <DialogContentText>
-        You are about to DELETE your API Key &quot;{apiKey.name}&quot; (ending in {apiKey.key_preview}).
-        Be sure, as this action cannot be undone!
+        You are about to DELETE your API Key &quot;{apiKey.name}&quot; (starting with <code>
+          {apiKey.key_preview}
+        </code>). Be sure, as this action cannot be undone!
       </DialogContentText>
       <DialogActions>
         <Button onClick={handleClose} disabled={submitting}>Close</Button>

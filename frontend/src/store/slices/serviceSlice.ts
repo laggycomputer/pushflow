@@ -4,6 +4,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 interface ServiceSliceState {
   currentServiceId: string | null,
   name: string;
+  vapidPublic: string;
   apiKeys: ServiceApiKey[];
   groups: ServiceGroup[];
   subscribers: ServiceSubscriber[];
@@ -14,6 +15,7 @@ const serviceSlice = createSlice({
   initialState: {
     currentServiceId: null,
     name: '',
+    vapidPublic: '',
     apiKeys: [],
     groups: [],
     subscribers: []
@@ -22,6 +24,7 @@ const serviceSlice = createSlice({
     resetState: (state) => {
       state.currentServiceId = null
       state.name = ''
+      state.vapidPublic = ''
       state.apiKeys = []
       state.groups = []
       state.subscribers = []

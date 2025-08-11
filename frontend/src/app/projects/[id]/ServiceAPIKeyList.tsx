@@ -15,6 +15,7 @@ import { registerWorker, subscribeToNotifications } from "@/helpers/webpush-test
 import { prependApiKey } from "@/store/slices/serviceSlice";
 import DeleteApiKeyDialog from "@/app/components/dialogs/DeleteApiKeyDialog";
 import { openDialog } from "@/store/slices/dialogSlice";
+import ApiKeyCodeSnippetDialog from "@/app/components/dialogs/ApiKeyCodeSnippetDialog";
 
 interface ServiceAPIKeyListProps {
   serviceId: string;
@@ -40,7 +41,7 @@ export default function ServiceAPIKeyList ({ serviceId, apiKeys: initialKeys }: 
 
   const handleTestClick = async () => {
     await registerWorker()
-    subscribeToNotifications(serviceId, ['0198930b-52e2-7052-88b0-f03983cbacd6'])
+    subscribeToNotifications(serviceId, ['0198972d-6fa0-7ff0-b3b2-86a46ecfbb73'])
   }
 
   return <Card className="list-container">
@@ -56,8 +57,6 @@ export default function ServiceAPIKeyList ({ serviceId, apiKeys: initialKeys }: 
     <CreateApiKeyDialog serviceId={serviceId} onCreate={handleCreateKey} />
     <ShowApiKeyDialog apiKey={createdApiKey} />
     <DeleteApiKeyDialog />
-    <Button onClick={handleTestClick}>
-      {process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY}<br/>{process.env.NEXT_PUBLIC_TEST_API_KEY}
-    </Button>
+    <ApiKeyCodeSnippetDialog />
   </Card>
 }

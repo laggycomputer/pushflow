@@ -10,6 +10,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import BuildIcon from '@mui/icons-material/Build';
 import GroupIcon from '@mui/icons-material/Group';
+import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone';
 import { pluralize } from "@/helpers/util";
 
 interface SubscriptionUserProps {
@@ -22,7 +23,7 @@ export default function SubscriptionUser (props: SubscriptionUserProps) {
   const groupText = pluralize(props.groupCount, 'groups', 'group')
 
   return <DataRow>
-    <IconWrapper flatShadow><PersonAddIcon /></IconWrapper>
+    <IconWrapper flatShadow><PhoneIphoneIcon /></IconWrapper>
     <DataRowInformation title={props.displayName}>
       <DataRowStatItem icon={<BuildIcon/>} text={`Created ${props.createdAt.toLocaleDateString()}`} />
       <DataRowStatItem icon={<GroupIcon/>} text={groupText} />
@@ -31,8 +32,8 @@ export default function SubscriptionUser (props: SubscriptionUserProps) {
       <Button variant="text" size="small"><EditIcon/></Button>
       <Divider/>
       <Button variant="text" size="small"><DeleteIcon/></Button>
-      <Divider/>
-      <Button variant="text" size="small"><ExpandMoreIcon/></Button>
+      {/* <Divider/>
+      <Button variant="text" size="small"><ExpandMoreIcon/></Button> */}
     </ButtonGroup>
   </DataRow>
 }
