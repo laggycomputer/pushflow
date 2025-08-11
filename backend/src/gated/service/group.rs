@@ -125,7 +125,7 @@ pub async fn patch_one_group(
     let (service_id, group_id) = params.into_inner();
     let body = body.into_inner();
 
-    let mut group = groups::Entity::find_by_id((group_id, service_id))
+    let mut group = groups::Entity::find_by_id((service_id, group_id))
         .one(&data.db)
         .await
         .context("get group to patch")?
