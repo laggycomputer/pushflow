@@ -1,9 +1,9 @@
 mod middleware;
 
 use crate::util::ReturnedError;
-use crate::{AnyhowBridge, BASE64_ENGINE, ExtractedAppData};
+use crate::{AnyhowBridge, ExtractedAppData, BASE64_ENGINE};
 use actix_web::web::Json;
-use actix_web::{Either, Responder, post, web};
+use actix_web::{post, web, Either, Responder};
 use actix_web_httpauth::extractors::bearer::BearerAuth;
 use anyhow::Context;
 use base64::Engine;
@@ -11,7 +11,9 @@ use entity::sea_orm_active_enums::KeyScope;
 use entity::{api_key_scopes, api_keys, group_subscribers, groups, services, subscribers};
 use migration::sea_query;
 use sea_orm::sea_query::OnConflict;
-use sea_orm::{ActiveModelTrait, ActiveValue, IntoActiveModel, PaginatorTrait, QueryTrait};
+use sea_orm::{
+    ActiveModelTrait, ActiveValue, IntoActiveModel, ModelTrait, PaginatorTrait, QueryTrait,
+};
 use sea_orm::{ColumnTrait, TransactionTrait};
 use sea_orm::{EntityTrait, QueryFilter};
 use serde::{Deserialize, Serialize};
@@ -228,6 +230,7 @@ async fn notify(
         .await
         .context("push update last_notified")?;
 
+    let page_size = 1_000;
     let mut it = group_subscribers::Entity::find()
         .filter(
             group_subscribers::Column::ServiceId
@@ -235,10 +238,12 @@ async fn notify(
                 .and(group_subscribers::Column::GroupId.eq(group_id)),
         )
         .find_also_related(subscribers::Entity)
-        .paginate(&data.db, 1_000);
+        .paginate(&data.db, page_size);
 
     let content_bytes = body.payload.as_bytes();
     let client = IsahcWebPushClient::new().context("construct push client")?;
+
+    let mut failed_pushes = Vec::with_capacity(page_size as usize);
 
     while let Some(ch) = it
         .fetch_and_next()
@@ -246,7 +251,7 @@ async fn notify(
         .context("next page of subscribers")?
     {
         for sub in ch {
-            let (_, Some(sub)) = sub else {
+            let (group_sub, Some(sub)) = sub else {
                 continue;
             };
 
@@ -273,9 +278,20 @@ async fn notify(
                 .send(builder.build().context("build push message")?)
                 .await
             {
-                // TODO: unsub
+                failed_pushes.push(group_sub.subscriber_id);
             }
         }
+
+        group_subscribers::Entity::delete_many()
+            .filter(
+                group_subscribers::Column::ServiceId
+                    .eq(service_id)
+                    .and(group_subscribers::Column::GroupId.eq(group_id))
+                    .and(group_subscribers::Column::SubscriberId.is_in(failed_pushes.drain(..))),
+            )
+            .exec(&data.db)
+            .await
+            .context("delete failed pushes")?;
     }
 
     Ok(Either::Right("ok"))
