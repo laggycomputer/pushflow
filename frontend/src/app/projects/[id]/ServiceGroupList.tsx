@@ -8,25 +8,24 @@ import { IconButton } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { pluralize } from "@/helpers/util";
 import CreateGroupDialog from "@/app/components/dialogs/CreateGroupDialog";
-import { setActiveDialog } from "@/store/slices/dialogSlice";
 import { DialogName } from "@/helpers/dialog";
-import { useAppDispatch } from "@/store/hooks";
-import { useState } from "react";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { addGroup } from "@/store/slices/serviceSlice";
+import { openDialog } from "@/store/slices/dialogSlice";
+import DeleteGroupDialog from "@/app/components/dialogs/DeleteGroupDialog";
 
 interface ServiceGroupListProps {
   serviceId: string;
   groups: ServiceGroup[];
 }
-export default function ServiceGroupList ({ serviceId, groups }: ServiceGroupListProps) {
+export default function ServiceGroupList ({ serviceId, groups: intialGroups }: ServiceGroupListProps) {
   const dispatch = useAppDispatch()
 
-  /** @todo put in redux store */
-  const [storedGroups, setStoredGroups] = useState(groups)
+  const groups = useAppSelector(state => state.service.currentServiceId === serviceId ? state.service.groups : intialGroups)
 
-  const openCreateGroupDialog = () => dispatch(setActiveDialog(DialogName.NewServiceGroupPopup))
-  const handleNewGroup = (group: ServiceGroup) => {
-    setStoredGroups([...storedGroups, group])
-  }
+  const openCreateGroupDialog = () => dispatch(openDialog(DialogName.NewServiceGroupPopup))
+
+  const handleNewGroup = (group: ServiceGroup) => dispatch(addGroup(group))
   
   const groupHeaderText = pluralize(groups.length + 1, 'Groups', 'Group')
 
@@ -42,13 +41,15 @@ export default function ServiceGroupList ({ serviceId, groups }: ServiceGroupLis
         lastNotified={new Date()}
         isService
       />
-      {storedGroups.map(g => <Group
+      {groups.map(g => <Group
         key={g.group_id}
+        groupId={g.group_id}
         name={g.name}
         userCount={2}
         lastNotified={new Date()}
       />)}
     </DataList>
     <CreateGroupDialog serviceId={serviceId} onCreate={handleNewGroup} />
+    <DeleteGroupDialog />
   </Card>
 }

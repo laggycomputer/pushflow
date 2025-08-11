@@ -1,3 +1,4 @@
+'use client';
 import { Button, ButtonGroup, Divider } from "@mui/material";
 import IconWrapper from "./IconWrapper";
 
@@ -10,13 +11,18 @@ import BuildIcon from '@mui/icons-material/Build';
 import WatchLaterIcon from '@mui/icons-material/WatchLater';
 import CodeIcon from '@mui/icons-material/Code';
 import { ServiceApiKey as ApiKey } from "@/types";
+import { DialogName } from "@/helpers/dialog";
+import { useAppDispatch } from "@/store/hooks";
+import { openDialogWithKey } from "@/store/slices/dialogSlice";
 
 interface ServiceApiKeyProps {
   data: ApiKey
 }
 
 export default function ServiceApiKey ({ data: apiKey }: ServiceApiKeyProps) {
-  const title = `${apiKey.name ? apiKey.name + ' • ' : ''}${apiKey.key_preview}...`
+  const dispatch = useAppDispatch()
+
+  const title = `${apiKey.name ? apiKey.name + ' • ' : ''}...${apiKey.key_preview}`
   const lastUsed = apiKey.last_used
     ? 'Used ' + new Date(apiKey.last_used).toLocaleDateString()
     : 'Never used'
@@ -30,7 +36,10 @@ export default function ServiceApiKey ({ data: apiKey }: ServiceApiKeyProps) {
     .map(s => scopeNames[s.scope])
     .filter(t => !!t)
     .join(', ')
-  console.log(apiKey.scopes)
+
+  const showDeletePopup = () => {
+    dispatch(openDialogWithKey({ name: DialogName.DeleteServiceApiKeyPopup, key: apiKey.key_preview }))
+  }
 
   return <DataRow>
     <IconWrapper flatShadow><PersonAddIcon /></IconWrapper>
@@ -41,7 +50,7 @@ export default function ServiceApiKey ({ data: apiKey }: ServiceApiKeyProps) {
     <ButtonGroup>
       <Button variant="text" size="small"><EditIcon /></Button>
       <Divider/>
-      <Button variant="text" size="small"><DeleteIcon /></Button>
+      <Button variant="text" size="small" onClick={showDeletePopup}><DeleteIcon /></Button>
       <Divider/>
       <Button variant="text" size="small"><CodeIcon /></Button>
     </ButtonGroup>

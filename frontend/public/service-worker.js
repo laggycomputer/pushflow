@@ -8,6 +8,5 @@ worker.addEventListener('push', event => {
   const respond = async () => {
     await worker.registration.showNotification(title, { body })
   }
-
   event.waitUntil(respond())
 })

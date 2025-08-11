@@ -3,10 +3,10 @@ import { ServiceApiKey } from "@/types";
 import { Button, Dialog, DialogActions, DialogContentText, IconButton } from "@mui/material";
 import Card, { CardHeader } from "../Card";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { setActiveDialog } from "@/store/slices/dialogSlice";
 
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { DialogName } from '@/helpers/dialog';
+import { closeDialog } from '@/store/slices/dialogSlice';
 
 interface ShowApiKeyDialogProps {
   apiKey?: ServiceApiKey;
@@ -15,7 +15,7 @@ export default function ShowApiKeyDialog ({ apiKey }: ShowApiKeyDialogProps) {
   const dispatch = useAppDispatch()
   const isOpen = useAppSelector(state => state.dialog.activeDialog === DialogName.ShowServiceApiKeyPopup)
 
-  const handleClose = () => dispatch(setActiveDialog(null))
+  const handleClose = () => dispatch(closeDialog())
   
   if (!apiKey) return null
 

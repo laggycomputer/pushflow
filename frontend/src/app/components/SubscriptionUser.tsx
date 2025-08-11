@@ -1,12 +1,13 @@
+'use client';
 import { Button, ButtonGroup, Divider } from "@mui/material";
 import IconWrapper from "./IconWrapper";
 
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import DataRow, { DataRowInformation, DataRowStatItem } from "./DataRow";
+
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import DataRow, { DataRowInformation, DataRowStatItem } from "./DataRow";
-
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import BuildIcon from '@mui/icons-material/Build';
 import GroupIcon from '@mui/icons-material/Group';
 import { pluralize } from "@/helpers/util";
@@ -21,7 +22,7 @@ export default function SubscriptionUser (props: SubscriptionUserProps) {
   const groupText = pluralize(props.groupCount, 'groups', 'group')
 
   return <DataRow>
-    <IconWrapper flatShadow><PersonAddIcon/></IconWrapper>
+    <IconWrapper flatShadow><PersonAddIcon /></IconWrapper>
     <DataRowInformation title={props.displayName}>
       <DataRowStatItem icon={<BuildIcon/>} text={`Created ${props.createdAt.toLocaleDateString()}`} />
       <DataRowStatItem icon={<GroupIcon/>} text={groupText} />

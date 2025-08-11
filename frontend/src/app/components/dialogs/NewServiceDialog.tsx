@@ -6,7 +6,7 @@ import { createService } from "@/helpers/service";
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { DialogName } from "@/helpers/dialog";
-import { setActiveDialog } from "@/store/slices/dialogSlice";
+import { closeDialog } from "@/store/slices/dialogSlice";
 
 export default function NewServiceDialog () {
   const dispatch = useAppDispatch()
@@ -16,7 +16,7 @@ export default function NewServiceDialog () {
   const [newServiceName, setNewServiceName] = useState('')
   const router = useRouter()
   
-  const handleClose = () => dispatch(setActiveDialog(null))
+  const handleClose = () => dispatch(closeDialog())
 
   const handleSubmit = async (event: React.FormEvent) => {
     setSubmitting(true)
@@ -40,6 +40,7 @@ export default function NewServiceDialog () {
           label="Service Name"
           fullWidth
           onChange={e => setNewServiceName(e.target.value)}
+          disabled={submitting}
         />
       </form>
       <DialogActions>

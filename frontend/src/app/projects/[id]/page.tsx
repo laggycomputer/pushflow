@@ -7,6 +7,7 @@ import ServiceGroupList from "./ServiceGroupList";
 import { getService } from '@/helpers/service';
 import { getServiceGroups } from '@/helpers/service-group';
 import { getServiceApiKeys } from '@/helpers/service-api-key';
+import ServiceStateLoader from './ServiceStateLoader';
 
 interface ProjectPageParams {
   params: Promise<{ id: string }>
@@ -22,6 +23,7 @@ export default async function ProjectPage ({ params }: ProjectPageParams) {
   if (!service) return notFound()
 
   return <div className="service-info-wrapper">
+    <ServiceStateLoader service={service} groups={groups} apiKeys={apiKeys} subscribers={[]} />
     <ServiceSubscriberList />
     <ServiceAPIKeyList serviceId={serviceId} apiKeys={apiKeys} />
     <ServiceGroupList serviceId={serviceId} groups={groups} />

@@ -65,6 +65,15 @@ a {
   text-decoration: none;
 }
 
+.page-loader {
+  display: block !important;
+  margin: 108px auto 36px;
+  box-sizing: content-box;
+  padding: 0 36px;
+  width: 100%;
+  align-items: center;
+}
+
 .theme-emphasis-box {
   box-shadow: var(--shadow-emphasis);
   padding: 16px 20px;
