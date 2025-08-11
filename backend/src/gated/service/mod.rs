@@ -187,8 +187,8 @@ impl ReturnedSubscriber {
     }
 }
 
-#[get("/subscribers")]
-pub async fn get_service_subscribers(
+#[get("/subscriber")]
+pub async fn get_service_subscriber(
     data: ExtractedAppData,
     service_id: web::Path<Uuid>,
 ) -> crate::Result<impl Responder> {
