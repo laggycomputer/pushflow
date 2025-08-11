@@ -1,12 +1,12 @@
 pub(crate) mod group;
 pub(crate) mod key;
 
-use crate::ExtractedAppData;
 use crate::gated::SessionUser;
 use crate::util::ReturnedError;
+use crate::ExtractedAppData;
 use actix_session::Session;
 use actix_web::http::StatusCode;
-use actix_web::{Either, HttpResponse, Responder, delete, get, patch, post, web};
+use actix_web::{delete, get, patch, post, web, Either, HttpResponse, Responder};
 use anyhow::Context;
 use entity::{group_subscribers, services, subscribers};
 use sea_orm::QueryFilter;
@@ -213,7 +213,7 @@ pub async fn get_service_subscriber(
 
 #[derive(Deserialize)]
 pub struct DeleteSubscriberBody {
-    endpoint: String,
+    subscriber_id: Uuid,
 }
 
 #[delete("/subscriber")]
@@ -223,13 +223,10 @@ pub async fn delete_service_subscriber(
 ) -> crate::Result<impl Responder> {
     let body = body.into_inner();
 
-    subscribers::Entity::delete(subscribers::ActiveModel {
-        endpoint: ActiveValue::Set(body.endpoint),
-        ..Default::default()
-    })
-    .exec(&data.db)
-    .await
-    .context("delete subscriber by endpoint")?;
+    subscribers::Entity::delete_by_id(body.subscriber_id)
+        .exec(&data.db)
+        .await
+        .context("delete subscriber by id")?;
 
     Ok("ok deleted")
 }
