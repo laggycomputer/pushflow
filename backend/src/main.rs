@@ -170,6 +170,7 @@ async fn main() -> anyhow::Result<()> {
                                         .service(gated::service::patch_one_service)
                                         .service(gated::service::delete_one_service)
                                         .service(gated::service::get_service_subscriber)
+                                        .service(gated::service::delete_service_subscriber)
                                         .service(
                                             web::scope("/group")
                                                 .service(gated::service::group::get_all_groups)

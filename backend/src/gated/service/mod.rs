@@ -210,3 +210,26 @@ pub async fn get_service_subscriber(
             .collect::<Vec<_>>(),
     ))
 }
+
+#[derive(Deserialize)]
+pub struct DeleteSubscriberBody {
+    endpoint: String,
+}
+
+#[delete("/subscriber")]
+pub async fn delete_service_subscriber(
+    data: ExtractedAppData,
+    body: web::Json<DeleteSubscriberBody>,
+) -> crate::Result<impl Responder> {
+    let body = body.into_inner();
+
+    subscribers::Entity::delete(subscribers::ActiveModel {
+        endpoint: ActiveValue::Set(body.endpoint),
+        ..Default::default()
+    })
+    .exec(&data.db)
+    .await
+    .context("delete subscriber by endpoint")?;
+
+    Ok("ok deleted")
+}
