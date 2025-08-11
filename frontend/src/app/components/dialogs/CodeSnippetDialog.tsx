@@ -82,14 +82,14 @@ export default function ApiKeyCodeSnippetDialog () {
       <Copyable multiline>
         {getSubscribeCode(serviceId, vapidPublicKey, selectedGroups.map(g => g.group_id))}
       </Copyable>
-      <DialogContentText>
+      {/* <DialogContentText>
         You can also click the button below to subscribe your current browser to these groups.
       </DialogContentText>
       <DialogActions className="actions-left">
         <Button onClick={handleTestSubscribe}>
           Test on this Browser
         </Button>
-      </DialogActions>
+      </DialogActions> */}
       <h3>Notify a Group</h3>
       <DialogContentText>Chosoe a group to send notifications to</DialogContentText>
       <FormControl fullWidth size="small" margin="dense">
