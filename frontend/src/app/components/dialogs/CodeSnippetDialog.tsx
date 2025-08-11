@@ -36,10 +36,6 @@ export default function ApiKeyCodeSnippetDialog () {
     subscribeToNotifications(serviceId, groupIds, vapidPublicKey, apiKey)
   }
 
-  const handleGroupSelectionChange = (event: any) => {
-    setSelectedGroups(event.target.value)
-  }
-  
   return <Dialog open={isOpen} onClose={handleClose} id="code-snippet-popup">
     <Card className="list-container">
       <CardHeader text="Integrate API Key" />
@@ -68,9 +64,9 @@ export default function ApiKeyCodeSnippetDialog () {
           label="Groups"
           renderValue={() => selectedGroups.map(g => g.name).join(', ')}
           multiple
-          onChange={handleGroupSelectionChange}
+          onChange={e => setSelectedGroups(e.target.value as ServiceGroup[])}
         >
-          {groups.map(g => <MenuItem key={g.group_id} value={g as any} className="csp-item">
+          {groups.map(g => <MenuItem key={g.group_id} value={g as unknown as string} className="csp-item">
             {selectedGroups.includes(g) ? <CheckIcon />: <Icon />}
             {g.name}
           </MenuItem>)}
@@ -82,14 +78,14 @@ export default function ApiKeyCodeSnippetDialog () {
       <Copyable multiline>
         {getSubscribeCode(serviceId, vapidPublicKey, selectedGroups.map(g => g.group_id))}
       </Copyable>
-      <DialogContentText>
+      {/* <DialogContentText>
         You can also click the button below to subscribe your current browser to these groups.
       </DialogContentText>
       <DialogActions className="actions-left">
         <Button onClick={handleTestSubscribe}>
           Test on this Browser
         </Button>
-      </DialogActions>
+      </DialogActions> */}
       <h3>Notify a Group</h3>
       <DialogContentText>Chosoe a group to send notifications to</DialogContentText>
       <FormControl fullWidth size="small" margin="dense">
@@ -100,7 +96,7 @@ export default function ApiKeyCodeSnippetDialog () {
           label="Group"
           onChange={event => setNotifyGroup(event.target.value as ServiceGroup | '')}
         >
-          {groups.map(g => <MenuItem key={g.group_id} value={g as any} className="csp-item">
+          {groups.map(g => <MenuItem key={g.group_id} value={g as unknown as string} className="csp-item">
             {g.name}
           </MenuItem>)}
         </Select>
