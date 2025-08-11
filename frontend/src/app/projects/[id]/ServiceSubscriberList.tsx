@@ -1,25 +1,22 @@
+'use client';
 import Card, { CardHeader } from "@/app/components/Card";
 import DataList from "@/app/components/DataList";
 import SubscriptionUser from "@/app/components/SubscriptionUser";
+import { pluralize } from "@/helpers/util";
+import { useAppSelector } from "@/store/hooks";
 import { ServiceSubscriber } from "@/types";
 
-export default function ServiceSubscriberList () {
-  const subscribers: ServiceSubscriber[] = [
-    {
-      service_id: "something",
-      subscriber_id: "ef20e72efd98e7e",
-      name: 'user 1 or something',
-      groups: ["test", 'tes4t', 'test2']
-    },
-    {
-      service_id: "something",
-      subscriber_id: "da5cef31890299",
-      name: 'A second user who has a name',
-      groups: ['service']
-    }
-  ]
+interface ServiceSubscriberListProps {
+  serviceId: string;
+  subscribers: ServiceSubscriber[];
+}
+
+export default function ServiceSubscriberList ({ serviceId, subscribers: initialSubs }: ServiceSubscriberListProps) {
+  const subscribers = useAppSelector(state => state.service.currentServiceId === serviceId ? state.service.subscribers : initialSubs)
+  const titleText = pluralize(subscribers.length, 'Subscribers', 'Subscriber')
+
   return <Card>
-    <CardHeader text="20 Subscribers" />
+    <CardHeader text={titleText} />
     <DataList>
       {subscribers.map(s => <SubscriptionUser
         key={s.subscriber_id}

@@ -2,6 +2,7 @@
   display: grid;
   padding: 108px 36px 36px;
   grid-template-areas: 'A B' 'A C';
+  grid-template-columns: 1fr 1fr;
   gap: 24px;
   height: 100%;
 
@@ -11,5 +12,6 @@
 
   @media (max-width: 1120px) {
     grid-template-areas: 'A' 'B' 'C';
+    grid-template-columns: auto;
   }
 }
