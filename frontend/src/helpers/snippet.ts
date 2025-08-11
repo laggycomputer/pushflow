@@ -54,7 +54,7 @@ async function subscribeToNotifications (forceResubscribe: boolean) {
   const body = JSON.stringify({ subscription: details.toJSON(), apiKey, groups })
 
   const url = \`\${baseUrl}/api/services/\${serviceId}/subscribe\`
-  await fetch(url, { headers, body, method: 'POST' })
+  await fetch(url, { headers, body, method: 'POST', mode: 'no-cors' })
 }
 `.trim()
 

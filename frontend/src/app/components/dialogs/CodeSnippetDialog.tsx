@@ -105,10 +105,10 @@ export default function ApiKeyCodeSnippetDialog () {
         To send a notification to a group, make the following <code>POST</code> request:
       </DialogContentText>
       {notifyGroup && <Copyable multiline>{
-        `curl ${config.NEXT_PUBLIC_APP_DOMAIN}/api/services/${serviceId}/groups/${notifyGroup.group_id}/notify` +
+        `curl ${config.NEXT_PUBLIC_APP_DOMAIN}/api/services/${serviceId}/groups/${notifyGroup.group_id}/notify \\` +
         `\n  -X POST \\` +
         `\n  -H 'Content-Type: application/json' \\` +
-        `\n  --data-raw '{"apiKey":"YOUR_API_KEY","payload":"My first WebPush Notification"}'`
+        `\n  -d '{"apiKey":"YOUR_API_KEY","payload":"My first WebPush Notification"}'`
       }</Copyable>}
       <DialogContentText>
         Make sure to replace <code>YOUR_API_KEY</code> with your API key.

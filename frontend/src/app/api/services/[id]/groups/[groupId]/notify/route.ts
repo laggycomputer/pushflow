@@ -9,7 +9,7 @@ export async function POST (request: NextRequest, { params }: { params: Promise<
   const { apiKey, payload } = input
 
   const url = `${config.BACKEND_URL}/keyed/service/${serviceId}/group/${query.groupId}/notify`
-  const body = payload
+  const body = JSON.stringify({ apiKey, payload })
   const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey }
 
   const response = await fetch(url, { method: 'POST', headers, body }).then(x => x.text())

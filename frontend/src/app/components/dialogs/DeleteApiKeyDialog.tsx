@@ -41,7 +41,7 @@ export default function DeleteApiKeyDialog () {
       <CardHeader text="Deleting API Key" />
       <DialogContentText>
         You are about to DELETE your API Key &quot;{apiKey.name}&quot; (starting with <code>
-          {apiKey.key_preview}
+          {apiKey.key_preview.slice(0,12)}
         </code>). Be sure, as this action cannot be undone!
       </DialogContentText>
       <DialogActions>

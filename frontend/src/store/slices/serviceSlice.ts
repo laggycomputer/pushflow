@@ -59,7 +59,7 @@ const serviceSlice = createSlice({
       if (index > -1) state.subscribers.splice(index, 1)
     },
     editSubscriber: (state, action: PayloadAction<ServiceSubscriber>) => {
-      const sub = state.subscribers.findIndex(s => s.subscriber_id === action.payload.subscriber_id)
+      const sub = state.subscribers.find(s => s.subscriber_id === action.payload.subscriber_id)
       if (sub) Object.assign(sub, action.payload)
     }
   }

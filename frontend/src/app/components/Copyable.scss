@@ -20,6 +20,8 @@
     align-items: start;
     pre {
       white-space: pre-wrap;
+      max-width: 100%;
+      word-break: break-word;
     }
   }
 }
