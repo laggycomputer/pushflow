@@ -168,6 +168,7 @@ async fn main() -> anyhow::Result<()> {
                                         .wrap(OwnsServiceBuilder)
                                         .service(gated::service::get_one_service)
                                         .service(gated::service::delete_one_service)
+                                        .service(gated::service::get_service_subscribers)
                                         .service(
                                             web::scope("/group")
                                                 .service(gated::service::group::get_all_groups)

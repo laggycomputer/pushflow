@@ -1,12 +1,12 @@
 pub(crate) mod group;
 pub(crate) mod key;
 
-use crate::ExtractedAppData;
 use crate::gated::SessionUser;
+use crate::ExtractedAppData;
 use actix_session::Session;
-use actix_web::{Either, HttpResponse, Responder, delete, get, post, web};
+use actix_web::{delete, get, post, web, Either, HttpResponse, Responder};
 use anyhow::Context;
-use entity::services;
+use entity::{group_subscribers, services, subscribers};
 use sea_orm::ColumnTrait;
 use sea_orm::EntityTrait;
 use sea_orm::QueryFilter;
@@ -111,4 +111,55 @@ pub async fn delete_one_service(
         .context("delete service by id")?;
 
     Ok("crab")
+}
+
+#[derive(Serialize)]
+struct ReturnedSubscriber {
+    service_id: Uuid,
+    subscriber_id: Uuid,
+    name: Option<String>,
+    email: Option<String>,
+    groups: Vec<Uuid>,
+}
+
+impl ReturnedSubscriber {
+    fn new(
+        service_id: &Uuid,
+        models: (subscribers::Model, Vec<group_subscribers::Model>),
+    ) -> ReturnedSubscriber {
+        Self {
+            service_id: service_id.clone(),
+            subscriber_id: models.0.subscriber_id,
+            name: models.0.name,
+            email: models.0.email,
+            groups: models
+                .1
+                .into_iter()
+                .map(|g_sub| g_sub.group_id)
+                .collect::<Vec<_>>(),
+        }
+    }
+}
+
+#[get("/subscribers")]
+pub async fn get_service_subscribers(
+    data: ExtractedAppData,
+    service_id: web::Path<Uuid>,
+) -> crate::Result<impl Responder> {
+    let service_id = service_id.into_inner();
+
+    let all_subscribers = subscribers::Entity::find()
+        .inner_join(group_subscribers::Entity)
+        .filter(group_subscribers::Column::ServiceId.eq(service_id))
+        .find_with_related(group_subscribers::Entity)
+        .all(&data.db)
+        .await
+        .context("get matching subscribers")?;
+
+    Ok(web::Json(
+        all_subscribers
+            .into_iter()
+            .map(|m| ReturnedSubscriber::new(&service_id, m))
+            .collect::<Vec<_>>(),
+    ))
 }
