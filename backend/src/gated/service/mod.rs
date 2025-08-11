@@ -20,6 +20,7 @@ struct ReturnedService {
     service_id: Uuid,
     owner_id: Uuid,
     name: String,
+    vapid_public: String,
 }
 
 impl From<services::Model> for ReturnedService {
@@ -28,6 +29,7 @@ impl From<services::Model> for ReturnedService {
             service_id: val.service_id,
             owner_id: val.owner_id,
             name: val.name,
+            vapid_public: val.vapid_public,
         }
     }
 }
