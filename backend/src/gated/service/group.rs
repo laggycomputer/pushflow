@@ -1,15 +1,16 @@
 use crate::util::ReturnedError;
 use crate::ExtractedAppData;
 use actix_web::http::StatusCode;
-use actix_web::{delete, get, post, web, Either, HttpResponse, Responder};
+use actix_web::{delete, get, patch, post, web, Either, HttpResponse, Responder};
 use anyhow::Context;
-use entity::groups;
+use entity::{groups, services};
 use sea_orm::prelude::DateTime;
-use sea_orm::QueryFilter;
+use sea_orm::{ActiveModelTrait, IntoActiveModel, QueryFilter, TryIntoModel};
 use sea_orm::{ActiveValue, ColumnTrait};
 use sea_orm::{EntityTrait, SqlErr};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use crate::gated::service::{PatchServiceBody, ReturnedService};
 
 #[derive(Serialize)]
 struct ReturnedGroup {
@@ -109,6 +110,50 @@ async fn get_one_group(
         None => Either::Left(HttpResponse::NotFound()),
         Some(group) => Either::Right(web::Json::<ReturnedGroup>(group.clone().into())),
     })
+}
+
+#[derive(Deserialize)]
+struct PatchGroupBody {
+    name: Option<String>,
+}
+
+#[patch("/{group_id}")]
+pub async fn patch_one_group(
+    data: ExtractedAppData,
+    params: web::Path<(Uuid, Uuid)>,
+    body: web::Json<PatchGroupBody>,
+) -> crate::Result<impl Responder> {
+    let (service_id, group_id) = params.into_inner();
+    let body = body.into_inner();
+
+    let mut group = groups::Entity::find_by_id((group_id, service_id))
+        .one(&data.db)
+        .await
+        .context("get group to patch")?
+        .context("group to patch DNE")?
+        .into_active_model();
+
+    if let Some(new_name) = body.name {
+        group.name = ActiveValue::Set(new_name);
+    }
+
+    match group.clone().update(&data.db).await {
+        Ok(_) => {}
+        Err(e) if matches!(e.sql_err(), Some(SqlErr::UniqueConstraintViolation(_))) => {
+            return Ok(Either::Left((
+                web::Json::<ReturnedError>("dup name".into()),
+                StatusCode::CONFLICT,
+            )));
+        }
+        Err(other) => Err(other).context("update group")?,
+    }
+
+    Ok(Either::Right(web::Json::<ReturnedGroup>(
+        group
+            .try_into_model()
+            .context("group into model")?
+            .into(),
+    )))
 }
 
 #[delete("/{group_id}")]
