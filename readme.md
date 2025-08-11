@@ -1,20 +1,3 @@
-# pushflow
-
-do web notifs good
-
-## setup
-
-The `.env.example` files are meant to ease local development/deployment.
-In the Railway context, setting environment variables would be preferred.
-You can use these files as an exhaustive list of required environment variables.
-
-You will need to do some setup:
-
-* You must set up Google OAuth: https://developers.google.com/identity/protocols/oauth2/web-server#enable-apis
-* **You should set `$JWT_SECRET`.** This passphrase protects all authorization in the app.
-
----
-
 # Railway Template – PushFlow: Hassle-Free WebPush Notifications
 
 Web Push notifications (i.e. the ones you grant permission to and receive through the browser) require a lot of setup to
@@ -56,6 +39,10 @@ We utilize the following:
 
 ## Dependencies + Implementation Details
 
+The `.env.example` files are meant to ease local development/deployment and are not required; the template will set most
+environment variables out of the box.
+
+What you do need to do:
 * You must set up Google OAuth: https://developers.google.com/identity/protocols/oauth2/web-server#enable-apis
 * **You should set `$JWT_SECRET` to a strong passphrase.** This passphrase protects all session creation on the
   dashboard. Failure to do so may result in CSRF attacks by guessing of certain secrets in the OAuth flow.
