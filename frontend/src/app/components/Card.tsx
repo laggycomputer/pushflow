@@ -11,8 +11,11 @@ export function CardHeader ({ text, children }: CardHeaderProps) {
   </div>
 }
 
-export default function Card ({ children }: PropsWithChildren) {
-  return <div className="card-outer">
+interface CardProps extends PropsWithChildren {
+  className?: string;
+}
+export default function Card ({ children, className = '' }: CardProps) {
+  return <div className={`card-outer ${className}`.trim()}>
     <div className="card-inner">
       {children}
     </div>

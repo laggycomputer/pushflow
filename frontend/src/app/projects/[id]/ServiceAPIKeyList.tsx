@@ -43,7 +43,7 @@ export default function ServiceAPIKeyList ({ serviceId, apiKeys: initialKeys }: 
     subscribeToNotifications(serviceId, ['0198930b-52e2-7052-88b0-f03983cbacd6'])
   }
 
-  return <Card>
+  return <Card className="list-container">
     <CardHeader text="API Keys">
       <IconButton size="small" onClick={openCreateApiKeyDialog}>
         <AddIcon />

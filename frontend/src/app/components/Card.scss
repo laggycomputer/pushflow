@@ -3,6 +3,24 @@
   box-shadow: var(--shadow-card-backdrop), var(--shadow-card-inner);
   padding: var(--padding-card-outer);
   border-radius: var(--border-radius-card);
+  overflow: auto;
+
+  &.list-container {
+    .card-inner {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-header {
+      $vertical: 12px;
+      position: sticky;
+      margin-block: -$vertical 4px 8px;
+      top: -$vertical;
+      padding-block: 12px 8px;
+      background-color: inherit;
+      z-index: 1;
+    }
+  }
 }
 
 .card-inner {
@@ -16,6 +34,7 @@
   display: flex;
   gap: 4px;
   margin-bottom: 16px;
+
   h2 {
     font-size: 24px;
     margin-right: auto;

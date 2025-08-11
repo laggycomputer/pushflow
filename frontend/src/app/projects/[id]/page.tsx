@@ -8,6 +8,7 @@ import { getService } from '@/helpers/service';
 import { getServiceGroups } from '@/helpers/service-group';
 import { getServiceApiKeys } from '@/helpers/service-api-key';
 import ServiceStateLoader from './ServiceStateLoader';
+import { getServiceSubscribers } from '@/helpers/service-subscriber';
 
 interface ProjectPageParams {
   params: Promise<{ id: string }>
@@ -17,6 +18,7 @@ export default async function ProjectPage ({ params }: ProjectPageParams) {
   const serviceId = (await params).id
 
   const service = await getService(serviceId)
+  const subscribers = await getServiceSubscribers(serviceId).then(x => x ?? [])
   const groups = await getServiceGroups(serviceId).then(x => x ?? [])
   const apiKeys = await getServiceApiKeys(serviceId).then(x => x ?? [])
 
@@ -24,7 +26,7 @@ export default async function ProjectPage ({ params }: ProjectPageParams) {
 
   return <div className="service-info-wrapper">
     <ServiceStateLoader service={service} groups={groups} apiKeys={apiKeys} subscribers={[]} />
-    <ServiceSubscriberList />
+    <ServiceSubscriberList serviceId={serviceId} subscribers={subscribers} />
     <ServiceAPIKeyList serviceId={serviceId} apiKeys={apiKeys} />
     <ServiceGroupList serviceId={serviceId} groups={groups} />
   </div>
