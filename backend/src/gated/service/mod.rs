@@ -211,19 +211,14 @@ pub async fn get_service_subscriber(
     ))
 }
 
-#[derive(Deserialize)]
-pub struct DeleteSubscriberBody {
-    subscriber_id: Uuid,
-}
-
-#[delete("/subscriber")]
+#[delete("/subscriber/{subscriber_id}")]
 pub async fn delete_service_subscriber(
     data: ExtractedAppData,
-    body: web::Json<DeleteSubscriberBody>,
+    path: web::Path<(Uuid, Uuid)>,
 ) -> crate::Result<impl Responder> {
-    let body = body.into_inner();
+    let (service_id, subscriber_id) = path.into_inner();
 
-    subscribers::Entity::delete_by_id(body.subscriber_id)
+    subscribers::Entity::delete_by_id(subscriber_id)
         .exec(&data.db)
         .await
         .context("delete subscriber by id")?;
