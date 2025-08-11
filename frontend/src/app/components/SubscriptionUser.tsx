@@ -12,15 +12,24 @@ import BuildIcon from '@mui/icons-material/Build';
 import GroupIcon from '@mui/icons-material/Group';
 import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone';
 import { pluralize } from "@/helpers/util";
+import { useAppDispatch } from "@/store/hooks";
+import { openDialogWithKey } from "@/store/slices/dialogSlice";
+import { DialogName } from "@/helpers/dialog";
 
 interface SubscriptionUserProps {
+  subId: string;
   displayName: string;
   createdAt: Date;
   groupCount: number;
 }
 
 export default function SubscriptionUser (props: SubscriptionUserProps) {
+  const dispatch = useAppDispatch()
   const groupText = pluralize(props.groupCount, 'groups', 'group')
+
+  const showDeleteSubscriberPopup = () => {
+    dispatch(openDialogWithKey({ name: DialogName.DeleteServiceSubscriberPopup, key: props.subId }))
+  }
 
   return <DataRow>
     <IconWrapper flatShadow><PhoneIphoneIcon /></IconWrapper>
@@ -31,7 +40,7 @@ export default function SubscriptionUser (props: SubscriptionUserProps) {
     <ButtonGroup>
       <Button variant="text" size="small"><EditIcon/></Button>
       <Divider/>
-      <Button variant="text" size="small"><DeleteIcon/></Button>
+      <Button variant="text" size="small" onClick={showDeleteSubscriberPopup}><DeleteIcon/></Button>
       {/* <Divider/>
       <Button variant="text" size="small"><ExpandMoreIcon/></Button> */}
     </ButtonGroup>

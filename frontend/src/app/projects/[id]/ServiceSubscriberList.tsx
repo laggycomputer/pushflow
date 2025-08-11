@@ -1,6 +1,7 @@
 'use client';
 import Card, { CardHeader } from "@/app/components/Card";
 import DataList from "@/app/components/DataList";
+import DeleteSubscriberDialog from "@/app/components/dialogs/DeleteSubscriberDialog";
 import SubscriptionUser from "@/app/components/SubscriptionUser";
 import { pluralize } from "@/helpers/util";
 import { useAppSelector } from "@/store/hooks";
@@ -20,10 +21,12 @@ export default function ServiceSubscriberList ({ serviceId, subscribers: initial
     <DataList>
       {subscribers.map(s => <SubscriptionUser
         key={s.subscriber_id}
+        subId={s.subscriber_id}
         displayName={s.name ?? s.subscriber_id}
         createdAt={new Date(s.created_at ?? Date.now())}
         groupCount={s.groups.length}
       />)}
     </DataList>
+    <DeleteSubscriberDialog />
   </Card>
 }
