@@ -12,12 +12,10 @@ export interface Service {
 }
 
 export interface ServiceSubscriber {
-  service_id: string;
   subscriber_id: string;
   name?: string;
   email?: string;
   created_at: string;
-  // endpoint will not be exposed
   // push_keys will not be exposed
   groups: string[];
 }

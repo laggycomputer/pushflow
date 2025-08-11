@@ -14,3 +14,15 @@ export async function getServiceSubscribers (serviceId: string): Promise<Service
 
   return response
 }
+
+export async function deleteSubscriber (serviceId: string, subscriberId: string): Promise<boolean> {
+  const headers = await getSessionHeaders()
+  if (!headers) return false
+  
+  const url = `${config.BACKEND_URL}/gated/service/${encodeURIComponent(serviceId)}/subscriber/${encodeURIComponent(subscriberId)}`
+  await fetch(url, { headers, method: 'DELETE' })
+    .then(x => x.text())
+    .catch(err => console.error(err))
+
+  return true
+}

@@ -45,10 +45,14 @@ const serviceSlice = createSlice({
     removeGroup: (state, action: PayloadAction<ServiceGroup>) => {
       const index = state.groups.findIndex(g => g.group_id === action.payload.group_id)
       if (index > -1) state.groups.splice(index, 1)
+    },
+    removeSubscriber: (state, action: PayloadAction<ServiceSubscriber>) => {
+      const index = state.subscribers.findIndex(s => s.subscriber_id === action.payload.subscriber_id)
+      if (index > -1) state.subscribers.splice(index, 1)
     }
   }
 });
 
-export const { resetState, setInitialData, prependApiKey, removeApiKey, addGroup, removeGroup } = serviceSlice.actions;
+export const { resetState, setInitialData, prependApiKey, removeApiKey, addGroup, removeGroup, removeSubscriber } = serviceSlice.actions;
 
 export default serviceSlice.reducer;

@@ -32,11 +32,11 @@ export async function getServiceApiKeys (serviceId: string): Promise<ServiceApiK
   return response
 }
 
-export async function deleteApiKey (serviceId: string, keyPreview: string): Promise<boolean> {
+export async function deleteApiKey (serviceId: string, keyId: string): Promise<boolean> {
   const headers = await getSessionHeaders()
   if (!headers) return false
   
-  const url = `${config.BACKEND_URL}/gated/service/${encodeURIComponent(serviceId)}/key/${encodeURIComponent(keyPreview)}`
+  const url = `${config.BACKEND_URL}/gated/service/${encodeURIComponent(serviceId)}/key/${encodeURIComponent(keyId)}`
   await fetch(url, { headers, method: 'DELETE' })
     .then(x => x.text())
     .catch(err => console.error(err))
