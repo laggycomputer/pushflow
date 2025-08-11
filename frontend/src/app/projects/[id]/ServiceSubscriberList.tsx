@@ -2,6 +2,7 @@
 import Card, { CardHeader } from "@/app/components/Card";
 import DataList from "@/app/components/DataList";
 import DeleteSubscriberDialog from "@/app/components/dialogs/DeleteSubscriberDialog";
+import EditSubscriberDialog from "@/app/components/dialogs/EditSubscriberDialog";
 import SubscriptionUser from "@/app/components/SubscriptionUser";
 import { pluralize } from "@/helpers/util";
 import { useAppSelector } from "@/store/hooks";
@@ -27,6 +28,7 @@ export default function ServiceSubscriberList ({ serviceId, subscribers: initial
         groupCount={s.groups.length}
       />)}
     </DataList>
+    <EditSubscriberDialog />
     <DeleteSubscriberDialog />
   </Card>
 }

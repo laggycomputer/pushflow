@@ -31,6 +31,10 @@ export default function SubscriptionUser (props: SubscriptionUserProps) {
     dispatch(openDialogWithKey({ name: DialogName.DeleteServiceSubscriberPopup, key: props.subId }))
   }
 
+  const showEditSubscriberPopup = () => {
+    dispatch(openDialogWithKey({ name: DialogName.EditServiceSubscriberPopup, key: props.subId }))
+  }
+
   return <DataRow>
     <IconWrapper flatShadow><PhoneIphoneIcon /></IconWrapper>
     <DataRowInformation title={props.displayName}>
@@ -38,7 +42,7 @@ export default function SubscriptionUser (props: SubscriptionUserProps) {
       <DataRowStatItem icon={<GroupIcon/>} text={groupText} />
     </DataRowInformation>
     <ButtonGroup>
-      <Button variant="text" size="small"><EditIcon/></Button>
+      <Button variant="text" size="small" onClick={showEditSubscriberPopup}><EditIcon/></Button>
       <Divider/>
       <Button variant="text" size="small" onClick={showDeleteSubscriberPopup}><DeleteIcon/></Button>
       {/* <Divider/>

@@ -11,7 +11,7 @@ import WatchLaterIcon from '@mui/icons-material/WatchLater';
 import WarningIcon from '@mui/icons-material/Warning';
 import { pluralize } from "@/helpers/util";
 import { useAppDispatch } from "@/store/hooks";
-import { openDialogWithKey } from "@/store/slices/dialogSlice";
+import { openDialog, openDialogWithKey } from "@/store/slices/dialogSlice";
 import { DialogName } from "@/helpers/dialog";
 
 interface BaseServiceGroupProps {
@@ -35,6 +35,11 @@ export default function ServiceGroup (props: ServiceGroupProps) {
     dispatch(openDialogWithKey({ name: DialogName.DeleteServiceGroupPopup, key: props.groupId! }))
   }
 
+  const openEditGroupDialog = () => {
+    if (!props.groupId) return
+    dispatch(openDialogWithKey({ name: DialogName.NewServiceGroupPopup, key: props.groupId }))
+  }
+
   return <DataRow>
     <IconWrapper flatShadow>{icon}</IconWrapper>
     <DataRowInformation title={props.name}>
@@ -42,7 +47,7 @@ export default function ServiceGroup (props: ServiceGroupProps) {
       <DataRowStatItem icon={<WatchLaterIcon/>} text={'Used ' + lastNotified} />
     </DataRowInformation>
     <ButtonGroup>
-      <Button variant="text" size="small"><EditIcon /></Button>
+      <Button variant="text" size="small" onClick={openEditGroupDialog}><EditIcon /></Button>
       <Divider/>
       <Button variant="text" size="small" disabled={props.isService} onClick={openDeleteDialog}><DeleteIcon /></Button>
     </ButtonGroup>

@@ -2,12 +2,12 @@
 import { Button, Dialog, DialogActions, TextField } from "@mui/material";
 import Card, { CardHeader } from "../Card";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { DialogName } from "@/helpers/dialog";
 import { closeDialog } from "@/store/slices/dialogSlice";
-import { createGroup } from "@/helpers/service-group";
+import { createGroup, updateGroup } from "@/helpers/service-group";
 import { ServiceGroup } from "@/types";
+import { editGroup } from "@/store/slices/serviceSlice";
 
 interface CreateGroupDialogProps {
   serviceId: string;
@@ -17,6 +17,8 @@ interface CreateGroupDialogProps {
 export default function CreateGroupDialog ({ serviceId, onCreate }: CreateGroupDialogProps) {
   const dispatch = useAppDispatch()
   const isOpen = useAppSelector(state => state.dialog.activeDialog === DialogName.NewServiceGroupPopup)
+  const groupId = useAppSelector(state => state.dialog.key)
+  const editingGroup = useAppSelector(state => state.service.groups.find(g => g.group_id === groupId))
   
   const [submitting, setSubmitting] = useState(false)
   const [groupName, setGroupName] = useState('')
@@ -26,6 +28,14 @@ export default function CreateGroupDialog ({ serviceId, onCreate }: CreateGroupD
   const handleSubmit = async (event: React.FormEvent) => {
     setSubmitting(true)
     event.preventDefault()
+    if (editingGroup) {
+      await updateGroup(serviceId, groupId, groupName)
+      setSubmitting(false)
+      handleClose()
+      dispatch(editGroup({ ...editingGroup, name: groupName }))
+      return
+    }
+
     const group = await createGroup(serviceId, groupName)
     setSubmitting(false)
     if (!group) return console.error('There was an error creating the group')
@@ -33,9 +43,11 @@ export default function CreateGroupDialog ({ serviceId, onCreate }: CreateGroupD
     handleClose()
   }
 
+  if (groupId && !editingGroup) return null
+
   return <Dialog open={isOpen} onClose={handleClose}>
     <Card>
-      <CardHeader text="Create Group" />
+      <CardHeader text={editingGroup ? 'Edit Group' : 'Create Group'} />
       <form onSubmit={handleSubmit} id="create-group-form">
         <TextField
           autoFocus
@@ -44,6 +56,7 @@ export default function CreateGroupDialog ({ serviceId, onCreate }: CreateGroupD
           name="group_name"
           label="Group Name"
           fullWidth
+          defaultValue={editingGroup?.name ?? ''}
           onChange={e => setGroupName(e.target.value)}
           disabled={submitting}
         />
@@ -51,7 +64,7 @@ export default function CreateGroupDialog ({ serviceId, onCreate }: CreateGroupD
       <DialogActions>
         <Button onClick={handleClose} disabled={submitting}>Cancel</Button>
         <Button form="create-group-form" type="submit" disabled={submitting} loading={submitting}>
-          Create
+          {editingGroup ? 'Save' : 'Create'}
         </Button>
       </DialogActions>
     </Card>

@@ -38,7 +38,11 @@ export default function ServiceApiKey ({ data: apiKey }: ServiceApiKeyProps) {
     .join(', ')
 
   const showDeletePopup = () => {
-    dispatch(openDialogWithKey({ name: DialogName.DeleteServiceApiKeyPopup, key: apiKey.key_preview }))
+    dispatch(openDialogWithKey({ name: DialogName.DeleteServiceApiKeyPopup, key: apiKey.key_id }))
+  }
+
+  const showEditPopup = () => {
+    dispatch(openDialogWithKey({ name: DialogName.NewServiceApiKeyPopup, key: apiKey.key_id }))
   }
 
   return <DataRow>
@@ -48,7 +52,7 @@ export default function ServiceApiKey ({ data: apiKey }: ServiceApiKeyProps) {
       <DataRowStatItem icon={<WatchLaterIcon/>} text={lastUsed} />
     </DataRowInformation>
     <ButtonGroup>
-      <Button variant="text" size="small"><EditIcon /></Button>
+      <Button variant="text" size="small" onClick={showEditPopup}><EditIcon /></Button>
       <Divider/>
       <Button variant="text" size="small" onClick={showDeletePopup}><DeleteIcon /></Button>
       {/* <Divider/>
