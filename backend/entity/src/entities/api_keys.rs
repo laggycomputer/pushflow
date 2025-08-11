@@ -9,6 +9,8 @@ pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub key_id: Uuid,
     pub name: String,
+    #[sea_orm(column_type = "VarBinary(StringLen::None)", unique)]
+    pub key: Vec<u8>,
     pub last_used: Option<DateTime>,
 }
 
@@ -21,7 +23,7 @@ pub enum Relation {
         from = "Column::ServiceId",
         to = "super::services::Column::ServiceId",
         on_update = "NoAction",
-        on_delete = "NoAction"
+        on_delete = "Cascade"
     )]
     Services,
 }

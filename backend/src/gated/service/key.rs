@@ -1,14 +1,17 @@
-use crate::ExtractedAppData;
-use actix_web::{Responder, delete, get, post, web};
+use crate::{ExtractedAppData, BASE64_ENGINE};
+use actix_web::http::StatusCode;
+use actix_web::{delete, get, post, web, Either, Responder};
 use anyhow::Context;
+use base64::Engine;
 use entity::api_key_scopes;
 use entity::api_keys;
 use entity::sea_orm_active_enums::KeyScope;
-use sea_orm::EntityTrait;
-use sea_orm::QueryFilter;
 use sea_orm::prelude::DateTime;
+use sea_orm::QueryFilter;
 use sea_orm::{ActiveModelTrait, ActiveValue, ColumnTrait, DbErr, TransactionTrait};
+use sea_orm::{EntityTrait, SqlErr, TransactionError};
 use serde::{Deserialize, Serialize};
+use sha2::Digest;
 use uuid::Uuid;
 
 #[derive(Serialize, Deserialize)]
@@ -45,6 +48,7 @@ impl From<api_key_scopes::Model> for ReturnedApiKeyScope {
 
 #[derive(Serialize)]
 struct ReturnedApiKey {
+    key_id: Uuid,
     service_id: Uuid,
     name: String,
     key_preview: String,
@@ -55,14 +59,18 @@ struct ReturnedApiKey {
 
 impl ReturnedApiKey {
     fn new(val: (api_keys::Model, Vec<api_key_scopes::Model>), trunc_key: bool) -> Self {
-        let mut key_id = val.0.key_id.to_string();
+        let mut key = BASE64_ENGINE.encode(&val.0.key);
 
         ReturnedApiKey {
             service_id: val.0.service_id,
+            key_id: val.0.key_id,
             name: val.0.name,
             key_preview: match trunc_key {
-                false => key_id,
-                true => key_id.split_off(24),
+                false => key,
+                true => { 
+                    key.truncate(24);
+                    key
+                },
             },
             last_used: val.0.last_used,
             scopes: val.1.into_iter().map(|x| x.into()).collect(),
@@ -112,22 +120,27 @@ async fn post_key(
     let service_id = service_id.into_inner();
     let body = body.into_inner();
 
-    let key_id = data
+    let (key_id, key) = match data
         .db
-        .transaction::<_, Uuid, DbErr>(move |txn| {
+        .transaction::<_, (Uuid, [u8; 64]), DbErr>(move |txn| {
             Box::pin(async move {
                 let key_id = Uuid::new_v4();
+
+                let mut hash = sha2::Sha512::default();
+                hash.update(service_id);
+                hash.update(key_id);
+                hash.update(Uuid::now_v7());
+                let hashed = hash.finalize();
 
                 api_keys::ActiveModel {
                     service_id: ActiveValue::set(service_id),
                     key_id: ActiveValue::Set(key_id),
                     name: ActiveValue::Set(body.name),
+                    key: ActiveValue::Set(hashed.to_vec()),
                     last_used: Default::default(),
                 }
                 .insert(txn)
                 .await?;
-
-                // TODO: throw CONFLICT on name unique cons violation
 
                 let scopes = body
                     .scopes
@@ -146,11 +159,19 @@ async fn post_key(
                     .exec(txn)
                     .await?;
 
-                Ok(key_id)
+                Ok((key_id, hashed.into()))
             })
         })
         .await
-        .context("insert key and scopes")?;
+    {
+        Ok(tup) => tup,
+        Err(TransactionError::Transaction(e))
+            if matches!(e.sql_err(), Some(SqlErr::UniqueConstraintViolation(_))) =>
+        {
+            return Ok(Either::Left(("dup name", StatusCode::CONFLICT)));
+        }
+        Err(other) => Err(other).context("insert key and scopes")?,
+    };
 
     let groups = api_keys::Entity::find_by_id(key_id)
         .find_with_related(api_key_scopes::Entity)
@@ -163,7 +184,10 @@ async fn post_key(
         .next()
         .context("should have created one key")?;
 
-    Ok(web::Json(ReturnedApiKey::new(one_key_and_scopes, false)))
+    Ok(Either::Right(web::Json(ReturnedApiKey::new(
+        one_key_and_scopes,
+        false,
+    ))))
 }
 
 #[delete("/{key_id}")]

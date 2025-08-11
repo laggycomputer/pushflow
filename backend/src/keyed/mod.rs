@@ -1,15 +1,16 @@
 mod middleware;
 
-use crate::{AnyhowBridge, ExtractedAppData};
+use crate::{AnyhowBridge, ExtractedAppData, BASE64_ENGINE};
 use actix_web::http::StatusCode;
 use actix_web::{post, web, Either, Responder};
 use actix_web_httpauth::extractors::bearer::BearerAuth;
 use anyhow::Context;
+use base64::Engine;
 use entity::sea_orm_active_enums::KeyScope;
-use entity::{api_key_scopes, group_subscribers, services, subscribers};
+use entity::{api_key_scopes, api_keys, group_subscribers, services, subscribers};
 use migration::sea_query;
 use sea_orm::sea_query::OnConflict;
-use sea_orm::{ActiveValue, PaginatorTrait};
+use sea_orm::{ActiveValue, PaginatorTrait, QueryTrait};
 use sea_orm::{ColumnTrait, TransactionTrait};
 use sea_orm::{EntityTrait, QueryFilter};
 use serde::{Deserialize, Serialize};
@@ -41,16 +42,17 @@ struct PostSubscribeBody {
 
 async fn key_has_scope(
     db: &sea_orm::DatabaseConnection,
-    key: &Uuid,
+    key: &[u8],
     service_id: &Uuid,
     group_id: &[Uuid],
     scope: KeyScope,
 ) -> crate::Result<bool> {
     Ok(api_key_scopes::Entity::find()
+        .inner_join(api_keys::Entity)
         .filter(
-            api_key_scopes::Column::KeyId
-                .eq(*key)
-                .and(api_key_scopes::Column::ServiceId.eq(*service_id))
+            api_keys::Column::ServiceId
+                .eq(*service_id)
+                .and(api_keys::Column::Key.eq(key))
                 .and(api_key_scopes::Column::GroupId.is_null())
                 .and(api_key_scopes::Column::Scope.eq(scope.clone())),
         )
@@ -58,16 +60,13 @@ async fn key_has_scope(
         .await?
         > 0
         || api_key_scopes::Entity::find()
+            .inner_join(api_keys::Entity)
             .filter(
-                api_key_scopes::Column::KeyId
-                    .eq(*key)
-                    .and(api_key_scopes::Column::ServiceId.eq(*service_id))
-                    .and(
-                        api_key_scopes::Column::GroupId
-                            .is_in(group_id.into_iter().cloned())
-                            .or(api_key_scopes::Column::GroupId.is_null()),
-                    )
-                    .and(api_key_scopes::Column::Scope.eq(scope)),
+                api_keys::Column::ServiceId
+                    .eq(*service_id)
+                    .and(api_keys::Column::Key.eq(key))
+                    .and(api_key_scopes::Column::GroupId.is_in(group_id.into_iter().copied()))
+                    .and(api_key_scopes::Column::Scope.eq(scope.clone())),
             )
             .count(db)
             .await?
@@ -82,7 +81,7 @@ async fn subscribe(
     service_id: web::Path<Uuid>,
     body: web::Json<PostSubscribeBody>,
 ) -> crate::Result<impl Responder> {
-    let Ok(auth) = auth.token().parse::<Uuid>() else {
+    let Ok(auth) = BASE64_ENGINE.decode(auth.token()) else {
         return Ok(Either::Left(("what", StatusCode::NOT_FOUND)));
     };
 
@@ -179,7 +178,7 @@ async fn notify(
     params: web::Path<(Uuid, Uuid)>,
     body: web::Json<PostNotifyBody>,
 ) -> crate::Result<impl Responder> {
-    let Ok(auth) = auth.token().parse::<Uuid>() else {
+    let Ok(auth) = BASE64_ENGINE.decode(auth.token()) else {
         return Ok(Either::Left(("what", StatusCode::NOT_FOUND)));
     };
 

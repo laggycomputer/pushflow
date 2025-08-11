@@ -9,6 +9,7 @@ pub struct Model {
     pub service_id: Uuid,
     #[sea_orm(primary_key, auto_increment = false)]
     pub group_id: Uuid,
+    #[sea_orm(primary_key, auto_increment = false)]
     pub subscriber_id: Uuid,
 }
 
@@ -19,7 +20,7 @@ pub enum Relation {
         from = "(Column::ServiceId, Column::GroupId)",
         to = "(super::groups::Column::ServiceId, super::groups::Column::GroupId)",
         on_update = "NoAction",
-        on_delete = "NoAction"
+        on_delete = "Cascade"
     )]
     Groups,
     #[sea_orm(
