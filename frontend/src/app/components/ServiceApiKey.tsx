@@ -1,5 +1,5 @@
 'use client';
-import { Button, ButtonGroup, Divider } from "@mui/material";
+import { Button, ButtonGroup, Dialog, Divider } from "@mui/material";
 import IconWrapper from "./IconWrapper";
 
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
@@ -22,7 +22,7 @@ interface ServiceApiKeyProps {
 export default function ServiceApiKey ({ data: apiKey }: ServiceApiKeyProps) {
   const dispatch = useAppDispatch()
 
-  const title = `${apiKey.name ? apiKey.name + ' • ' : ''}...${apiKey.key_preview}`
+  const title = `${apiKey.name ? apiKey.name + ' • ' : ''}${apiKey.key_preview.slice(0, 12)}...`
   const lastUsed = apiKey.last_used
     ? 'Used ' + new Date(apiKey.last_used).toLocaleDateString()
     : 'Never used'
@@ -51,8 +51,8 @@ export default function ServiceApiKey ({ data: apiKey }: ServiceApiKeyProps) {
       <Button variant="text" size="small"><EditIcon /></Button>
       <Divider/>
       <Button variant="text" size="small" onClick={showDeletePopup}><DeleteIcon /></Button>
-      <Divider/>
-      <Button variant="text" size="small"><CodeIcon /></Button>
+      {/* <Divider/>
+      <Button variant="text" size="small" onClick={showSnippetPopup}><CodeIcon /></Button> */}
     </ButtonGroup>
   </DataRow>
 }

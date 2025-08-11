@@ -25,7 +25,7 @@ export default async function ProjectPage ({ params }: ProjectPageParams) {
   if (!service) return notFound()
 
   return <div className="service-info-wrapper">
-    <ServiceStateLoader service={service} groups={groups} apiKeys={apiKeys} subscribers={[]} />
+    <ServiceStateLoader service={service} groups={groups} apiKeys={apiKeys} subscribers={subscribers} />
     <ServiceSubscriberList serviceId={serviceId} subscribers={subscribers} />
     <ServiceAPIKeyList serviceId={serviceId} apiKeys={apiKeys} />
     <ServiceGroupList serviceId={serviceId} groups={groups} />

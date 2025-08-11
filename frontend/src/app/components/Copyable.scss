@@ -1,0 +1,25 @@
+.copy-box {
+  display: flex;
+  align-items: center;
+  font-size: 18px;
+  user-select: all;
+  .MuiIconButton-root {
+    margin: -6px -10px;
+    margin-left: auto;
+  }
+  span {
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &.multiline {
+    user-select: auto;
+    font-size: 13px;
+    align-items: start;
+    pre {
+      white-space: pre-wrap;
+    }
+  }
+}

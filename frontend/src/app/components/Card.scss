@@ -3,7 +3,7 @@
   box-shadow: var(--shadow-card-backdrop), var(--shadow-card-inner);
   padding: var(--padding-card-outer);
   border-radius: var(--border-radius-card);
-  overflow: auto;
+  overflow: hidden;
 
   &.list-container {
     .card-inner {
@@ -12,11 +12,11 @@
     }
 
     .card-header {
-      $vertical: 12px;
+      $vertical: 16px;
       position: sticky;
-      margin-block: -$vertical 4px 8px;
+      margin: -$vertical 0 8px;
       top: -$vertical;
-      padding-block: 12px 8px;
+      padding-block: $vertical 8px;
       background-color: inherit;
       z-index: 1;
     }
@@ -28,6 +28,7 @@
   padding: var(--padding-card-inner);
   border-radius: var(--border-radius-card);
   height: 100%;
+  overflow: auto;
 }
 
 .card-header {

@@ -7,7 +7,8 @@ export interface Service {
   service_id: string;
   owner_uid: string;
   name: string;
-  // vapid keys will not be exposed
+  vapid_public: string;
+  // vapid private key will not be exposed
 }
 
 export interface ServiceSubscriber {
@@ -15,6 +16,7 @@ export interface ServiceSubscriber {
   subscriber_id: string;
   name?: string;
   email?: string;
+  created_at: string;
   // endpoint will not be exposed
   // push_keys will not be exposed
   groups: string[];
@@ -29,6 +31,7 @@ export interface ServiceGroup {
 }
 
 export interface ServiceApiKey {
+  key_id: string;
   name: string;
   service_id: string;
   key_preview: string;

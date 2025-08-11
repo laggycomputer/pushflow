@@ -10,7 +10,7 @@ import { User } from '@/types';
 
 import AddIcon from '@mui/icons-material/Add';
 import PersonIcon from '@mui/icons-material/Person';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import CodeIcon from '@mui/icons-material/Code';
 
 export default function Header ({ user }: { user: User | null }) {
   const dispatch = useAppDispatch()
@@ -25,6 +25,10 @@ export default function Header ({ user }: { user: User | null }) {
 
   const openCreateNewServiceForm = () => dispatch(openDialog(DialogName.NewServicePopup))
 
+  const showSnippetPopup = () => {
+    dispatch(openDialog(DialogName.ShowServiceApiKeySnippetPopup))
+  }
+
   return <div className="app-header">
     <Link href="/">
       <Image src="/logo.png" width={48} height={48} alt="Icon" />
@@ -36,8 +40,8 @@ export default function Header ({ user }: { user: User | null }) {
     {!hasService && <Button startIcon={<AddIcon />} onClick={openCreateNewServiceForm}>
       <span>New Service</span>
     </Button>}
-    {hasService && <Button startIcon={<PersonAddIcon />}>
-      <span>Share</span>
+    {hasService && <Button startIcon={<CodeIcon />} onClick={showSnippetPopup}>
+      <span>Integrate</span>
     </Button>}
 
     <IconButton onClick={toggleAuth} className="user-button">

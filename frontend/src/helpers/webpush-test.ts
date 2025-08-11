@@ -27,8 +27,8 @@ export async function subscribeToNotifications (serviceId: string, groups: strin
 
 export async function registerWorker () {
   if (!('serviceWorker' in navigator)) return console.error('Cannot register service worker')
-
   const worker = await navigator.serviceWorker.register('/service-worker.js')
+
   if (!('Notification' in window)) return console.error('Notification not supported')
   if (await worker.pushManager.getSubscription()) return console.log('Already subscribed')
 }

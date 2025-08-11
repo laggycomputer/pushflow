@@ -19,7 +19,14 @@ export default function ServiceStateLoader ({ service, subscribers, groups, apiK
   }
 
   const onMount = () => {
-    dispatch(setInitialData({ currentServiceId: service.service_id, name: service.name, subscribers, apiKeys, groups }))
+    dispatch(setInitialData({
+      currentServiceId: service.service_id,
+      name: service.name,
+      vapidPublic: service.vapid_public,
+      subscribers,
+      apiKeys,
+      groups
+    }))
   }
 
   useEffect(() => {
