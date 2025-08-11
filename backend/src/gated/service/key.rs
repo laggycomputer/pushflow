@@ -1,19 +1,19 @@
+use crate::util::ReturnedError;
 use crate::{ExtractedAppData, BASE64_ENGINE};
 use actix_web::http::StatusCode;
-use actix_web::{delete, get, post, web, Either, Responder};
+use actix_web::{delete, get, patch, post, web, Either, Responder};
 use anyhow::Context;
 use base64::Engine;
 use entity::api_key_scopes;
 use entity::api_keys;
 use entity::sea_orm_active_enums::KeyScope;
 use sea_orm::prelude::DateTime;
-use sea_orm::QueryFilter;
 use sea_orm::{ActiveModelTrait, ActiveValue, ColumnTrait, DbErr, TransactionTrait};
 use sea_orm::{EntityTrait, SqlErr, TransactionError};
+use sea_orm::{IntoActiveModel, QueryFilter};
 use serde::{Deserialize, Serialize};
 use sha2::Digest;
 use uuid::Uuid;
-use crate::util::ReturnedError;
 
 #[derive(Serialize, Deserialize)]
 struct KeyScope2(#[serde(with = "crate::util::active_enum")] KeyScope);
@@ -71,7 +71,7 @@ impl ReturnedApiKey {
                 true => {
                     key.truncate(24);
                     key
-                },
+                }
             },
             last_used: val.0.last_used,
             scopes: val.1.into_iter().map(|x| x.into()).collect(),
@@ -169,8 +169,10 @@ async fn post_key(
         Err(TransactionError::Transaction(e))
             if matches!(e.sql_err(), Some(SqlErr::UniqueConstraintViolation(_))) =>
         {
-            return Ok(Either::Left((                web::Json::<ReturnedError>("dup name".into()),
-                                    StatusCode::CONFLICT)));
+            return Ok(Either::Left((
+                web::Json::<ReturnedError>("dup name".into()),
+                StatusCode::CONFLICT,
+            )));
         }
         Err(other) => Err(other).context("insert key and scopes")?,
     };
@@ -190,6 +192,45 @@ async fn post_key(
         one_key_and_scopes,
         false,
     ))))
+}
+
+#[derive(Deserialize)]
+struct PatchKeyBody {
+    name: Option<String>,
+}
+
+#[patch("/{key_id}")]
+pub async fn patch_one_key(
+    data: ExtractedAppData,
+    params: web::Path<(Uuid, Uuid)>,
+    body: web::Json<PatchKeyBody>,
+) -> crate::Result<impl Responder> {
+    let (service_id, key_id) = params.into_inner();
+    let body = body.into_inner();
+
+    let mut api_key = api_keys::Entity::find_by_id(key_id)
+        .one(&data.db)
+        .await
+        .context("get key to patch")?
+        .context("key to patch DNE")?
+        .into_active_model();
+
+    if let Some(new_name) = body.name {
+        api_key.name = ActiveValue::Set(new_name);
+    }
+
+    match api_key.clone().update(&data.db).await {
+        Ok(_) => {}
+        Err(e) if matches!(e.sql_err(), Some(SqlErr::UniqueConstraintViolation(_))) => {
+            return Ok(Either::Left((
+                web::Json::<ReturnedError>("dup name".into()),
+                StatusCode::CONFLICT,
+            )));
+        }
+        Err(other) => Err(other).context("update key")?,
+    }
+
+    Ok(Either::Right("ok renamed"))
 }
 
 #[delete("/{key_id}")]
