@@ -1,5 +1,7 @@
 # Railway Template – PushFlow: Hassle-Free WebPush Notifications
 
+> **Update**: We won third place in Complexity in the [Railway User Hackathon 2025](https://blog.railway.com/p/hackathon-2025-winners)! This means our project is certified awesome and you should consider using it.
+
 Web Push notifications (i.e. the ones you grant permission to and receive through the browser) require a lot of setup to
 send.
 There are a confusing set of keys and other strings you have to retain and send or not send to various parties.
