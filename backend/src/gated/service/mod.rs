@@ -1,14 +1,14 @@
 pub(crate) mod group;
 pub(crate) mod key;
 
+use crate::ExtractedAppData;
 use crate::gated::SessionUser;
 use crate::util::ReturnedError;
-use crate::ExtractedAppData;
 use actix_session::Session;
-use actix_web::http::header::{HeaderName, HeaderValue};
 use actix_web::http::StatusCode;
-use actix_web::{delete, get, patch, post, web, Either, HttpRequest, HttpResponse, Responder};
-use anyhow::{anyhow, Context};
+use actix_web::http::header::{HeaderName, HeaderValue};
+use actix_web::{Either, HttpRequest, HttpResponse, Responder, delete, get, patch, post, web};
+use anyhow::{Context, anyhow};
 use entity::{group_subscribers, services, subscribers};
 use sea_orm::QueryFilter;
 use sea_orm::{ActiveModelTrait, EntityTrait, SqlErr, TryIntoModel};
@@ -97,7 +97,7 @@ async fn post_service(
     let _ = std::mem::replace(res.status_mut(), StatusCode::CREATED);
     res.headers_mut().insert(
         HeaderName::from_static("location"),
-        HeaderValue::from_str(&url.to_string()).context("Location value as HeaderValue")?,
+        HeaderValue::from_str(url.as_ref()).context("Location value as HeaderValue")?,
     );
 
     Ok(res)

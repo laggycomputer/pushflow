@@ -1,9 +1,9 @@
 mod middleware;
 
 use crate::util::ReturnedError;
-use crate::{AnyhowBridge, ExtractedAppData, BASE64_ENGINE};
+use crate::{AnyhowBridge, BASE64_ENGINE, ExtractedAppData};
 use actix_web::web::Json;
-use actix_web::{post, web, Either, Responder};
+use actix_web::{Either, Responder, post, web};
 use actix_web_httpauth::extractors::bearer::BearerAuth;
 use anyhow::Context;
 use base64::Engine;

@@ -1,9 +1,9 @@
-use crate::util::ReturnedError;
 use crate::ExtractedAppData;
-use actix_web::http::header::{HeaderName, HeaderValue};
+use crate::util::ReturnedError;
 use actix_web::http::StatusCode;
-use actix_web::{delete, get, patch, post, web, Either, HttpRequest, HttpResponse, Responder};
-use anyhow::{anyhow, Context};
+use actix_web::http::header::{HeaderName, HeaderValue};
+use actix_web::{Either, HttpRequest, HttpResponse, Responder, delete, get, patch, post, web};
+use anyhow::{Context, anyhow};
 use entity::groups;
 use sea_orm::prelude::DateTime;
 use sea_orm::{ActiveModelTrait, IntoActiveModel, QueryFilter, TryIntoModel};
@@ -92,14 +92,12 @@ async fn post_group(
         .map_err(|_| anyhow!("service POST isn't base"))?
         .push(&returned_ent.group_id.to_string());
 
-    let mut res = web::Json::<ReturnedGroup>(
-        returned_ent.into(),
-    ).respond_to(&req);
+    let mut res = web::Json::<ReturnedGroup>(returned_ent.into()).respond_to(&req);
 
     let _ = std::mem::replace(res.status_mut(), StatusCode::CREATED);
     res.headers_mut().insert(
         HeaderName::from_static("location"),
-        HeaderValue::from_str(&url.to_string()).context("Location value as HeaderValue")?,
+        HeaderValue::from_str(url.as_ref()).context("Location value as HeaderValue")?,
     );
 
     Ok(Either::Right(res))
