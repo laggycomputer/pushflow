@@ -1,8 +1,9 @@
-use crate::ExtractedAppData;
 use crate::util::ReturnedError;
+use crate::ExtractedAppData;
+use actix_web::http::header::{HeaderName, HeaderValue};
 use actix_web::http::StatusCode;
-use actix_web::{Either, HttpResponse, Responder, delete, get, patch, post, web};
-use anyhow::Context;
+use actix_web::{delete, get, patch, post, web, Either, HttpRequest, HttpResponse, Responder};
+use anyhow::{anyhow, Context};
 use entity::groups;
 use sea_orm::prelude::DateTime;
 use sea_orm::{ActiveModelTrait, IntoActiveModel, QueryFilter, TryIntoModel};
@@ -58,6 +59,7 @@ pub struct PostGroupBody {
 #[post("")]
 async fn post_group(
     data: ExtractedAppData,
+    req: HttpRequest,
     service_id: web::Path<Uuid>,
     body: web::Json<PostGroupBody>,
 ) -> crate::Result<impl Responder> {
@@ -84,9 +86,23 @@ async fn post_group(
         Err(e) => return Err(e).context("insert new group")?,
     };
 
-    Ok(Either::Right(web::Json::<ReturnedGroup>(
+    let mut url = req.full_url();
+
+    url.path_segments_mut()
+        .map_err(|_| anyhow!("service POST isn't base"))?
+        .push(&returned_ent.group_id.to_string());
+
+    let mut res = web::Json::<ReturnedGroup>(
         returned_ent.into(),
-    )))
+    ).respond_to(&req);
+
+    let _ = std::mem::replace(res.status_mut(), StatusCode::CREATED);
+    res.headers_mut().insert(
+        HeaderName::from_static("location"),
+        HeaderValue::from_str(&url.to_string()).context("Location value as HeaderValue")?,
+    );
+
+    Ok(Either::Right(res))
 }
 
 #[get("/{group_id}")]

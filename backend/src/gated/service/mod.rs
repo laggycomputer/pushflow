@@ -5,9 +5,10 @@ use crate::gated::SessionUser;
 use crate::util::ReturnedError;
 use crate::ExtractedAppData;
 use actix_session::Session;
+use actix_web::http::header::{HeaderName, HeaderValue};
 use actix_web::http::StatusCode;
-use actix_web::{delete, get, patch, post, web, Either, HttpResponse, Responder};
-use anyhow::Context;
+use actix_web::{delete, get, patch, post, web, Either, HttpRequest, HttpResponse, Responder};
+use anyhow::{anyhow, Context};
 use entity::{group_subscribers, services, subscribers};
 use sea_orm::QueryFilter;
 use sea_orm::{ActiveModelTrait, EntityTrait, SqlErr, TryIntoModel};
@@ -60,6 +61,7 @@ pub struct PostServiceBody {
 
 #[post("")]
 async fn post_service(
+    req: HttpRequest,
     data: ExtractedAppData,
     session: Session,
     body: web::Json<PostServiceBody>,
@@ -85,7 +87,20 @@ async fn post_service(
         .await
         .context("insert new service")?;
 
-    Ok(web::Json::<ReturnedService>(returned_ent.into()))
+    let mut url = req.full_url();
+
+    url.path_segments_mut()
+        .map_err(|_| anyhow!("service POST isn't base"))?
+        .push(&returned_ent.service_id.to_string());
+
+    let mut res = web::Json::<ReturnedService>(returned_ent.into()).respond_to(&req);
+    let _ = std::mem::replace(res.status_mut(), StatusCode::CREATED);
+    res.headers_mut().insert(
+        HeaderName::from_static("location"),
+        HeaderValue::from_str(&url.to_string()).context("Location value as HeaderValue")?,
+    );
+
+    Ok(res)
 }
 
 #[get("")]
