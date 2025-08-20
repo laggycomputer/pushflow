@@ -134,10 +134,8 @@ async fn subscribe(
                             name: ActiveValue::set(body.subscription.name),
                             email: ActiveValue::set(body.subscription.email),
                             endpoint: ActiveValue::set(endpoint),
-                            client_key: ActiveValue::Set(
-                                serde_json::to_string(&body.subscription.keys)
-                                    .context("json encode keys")?,
-                            ),
+                            p256dh: ActiveValue::Set(body.subscription.keys.p256dh.clone()),
+                            auth: ActiveValue::Set(body.subscription.keys.auth.clone()),
                         };
 
                         let sub_ids = subscribers::Entity::insert(ent)
@@ -145,7 +143,8 @@ async fn subscribe(
                                 sea_query::OnConflict::column(subscribers::Column::Endpoint)
                                     .update_column(subscribers::Column::Name)
                                     .update_column(subscribers::Column::Email)
-                                    .update_column(subscribers::Column::ClientKey)
+                                    .update_column(subscribers::Column::P256dh)
+                                    .update_column(subscribers::Column::Auth)
                                     .to_owned(),
                             )
                             .exec_with_returning_keys(txn)
@@ -255,11 +254,7 @@ async fn notify(
                 continue;
             };
 
-            let Ok(keys) = serde_json::from_str::<PostSubscribeBodyKeys>(&sub.client_key) else {
-                continue;
-            };
-
-            let subscription_info = SubscriptionInfo::new(sub.endpoint, keys.p256dh, keys.auth);
+            let subscription_info = SubscriptionInfo::new(sub.endpoint, sub.p256dh, sub.auth);
 
             let sig_builder =
                 VapidSignatureBuilder::from_base64(&svc.vapid_private, &subscription_info)

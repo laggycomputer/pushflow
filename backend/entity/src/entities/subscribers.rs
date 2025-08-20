@@ -11,7 +11,8 @@ pub struct Model {
     pub email: Option<String>,
     #[sea_orm(unique)]
     pub endpoint: String,
-    pub client_key: String,
+    pub p256dh: String,
+    pub auth: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
