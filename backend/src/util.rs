@@ -19,16 +19,13 @@ where
 // turn chrono NaiveDateTime (as sea_orm::prelude::DateTime) into ISO 8601 and back
 pub mod naive_utc_rfc3339 {
     use sea_orm::prelude::{DateTime, DateTimeWithTimeZone};
-    use sea_orm::sqlx::types::chrono::FixedOffset;
-    use serde::{Deserialize, Deserializer, Serializer, de};
+    use serde::{de, Deserialize, Deserializer, Serializer};
 
     pub fn serialize<S>(dt: &DateTime, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        let utc_dt: DateTimeWithTimeZone =
-            DateTimeWithTimeZone::from_naive_utc_and_offset(*dt, FixedOffset::east_opt(0).unwrap());
-        serializer.serialize_str(&utc_dt.to_rfc3339())
+        serializer.serialize_str(&dt.and_utc().to_rfc3339())
     }
 
     pub fn deserialize<'de, D>(deserializer: D) -> Result<DateTime, D::Error>
@@ -45,7 +42,7 @@ pub mod naive_utc_rfc3339 {
 pub mod naive_utc_rfc3339_opt {
     use crate::util::naive_utc_rfc3339;
     use sea_orm::prelude::{DateTime, DateTimeWithTimeZone};
-    use serde::{Deserialize, Deserializer, Serializer, de};
+    use serde::{de, Deserialize, Deserializer, Serializer};
 
     pub fn serialize<S>(dt: &Option<DateTime>, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -72,7 +69,7 @@ pub mod naive_utc_rfc3339_opt {
 
 pub mod active_enum {
     use sea_orm::ActiveEnum;
-    use serde::{Deserialize, Deserializer, Serializer, de};
+    use serde::{de, Deserialize, Deserializer, Serializer};
 
     pub fn serialize<A, S>(active_enum: &A, serializer: S) -> Result<S::Ok, S::Error>
     where
