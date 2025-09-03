@@ -104,7 +104,7 @@ export default function ApiKeyCodeSnippetDialog () {
       <DialogContentText>
         To send a notification to a group, make the following <code>POST</code> request:
       </DialogContentText>
-      {notifyGroup && <Copyable multiline>{
+      {notifyGroup && <Copyable multiline lang="bash">{
         `curl ${config.NEXT_PUBLIC_APP_DOMAIN}/api/services/${serviceId}/groups/${notifyGroup.group_id}/notify \\` +
         `\n  -X POST \\` +
         `\n  -H 'Content-Type: application/json' \\` +

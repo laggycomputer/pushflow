@@ -14,9 +14,11 @@
     "@mui/icons-material": "^7.3.1",
     "@mui/material": "^7.3.1",
     "@reduxjs/toolkit": "^2.8.2",
-    "next": "15.4.6",
+    "highlight.js": "^11.11.1",
+    "next": "^15.5.2",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "react-highlight": "^0.15.0",
     "react-redux": "^9.2.0",
     "sass": "^1.90.0"
   },
@@ -25,6 +27,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/react-highlight": "^0.12.8",
     "eslint": "^9",
     "eslint-config-next": "15.4.6",
     "typescript": "^5"

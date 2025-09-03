@@ -1,23 +1,26 @@
 import { IconButton } from '@mui/material';
 import './Copyable.scss';
 import { PropsWithChildren } from "react";
+import Highlight from 'react-highlight'
+import 'highlight.js/styles/github-dark-dimmed.css'
 
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 
 interface CopyableProps extends PropsWithChildren {
   multiline?: boolean;
   children: string;
+  lang?: string
 }
 
-export default function Copyable ({ children, multiline }: CopyableProps) {
+export default function Copyable ({ children, multiline, lang = 'typescript' }: CopyableProps) {
   const copyText = () => {
     navigator.clipboard.writeText(children)
   }
 
   return <div className={`theme-emphasis-box copy-box${multiline ? ' multiline' : ''}`}>
-    <pre><code>
+    <Highlight className={lang}>
       {children}
-    </code></pre>
+    </Highlight>
     <IconButton
       aria-label="Copy API Key"
       onClick={copyText}

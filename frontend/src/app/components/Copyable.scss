@@ -7,7 +7,7 @@
     margin: -6px -10px;
     margin-left: auto;
   }
-  span {
+  > span {
     max-width: 100%;
     white-space: nowrap;
     overflow: hidden;
@@ -18,10 +18,17 @@
     user-select: auto;
     font-size: 13px;
     align-items: start;
+
     pre {
       white-space: pre-wrap;
       max-width: 100%;
       word-break: break-word;
+    }
+
+    pre > code.hljs {
+      padding: 0;
+      background-color: transparent;
+      white-space: pre-wrap;
     }
   }
 }
