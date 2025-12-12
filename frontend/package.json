@@ -15,9 +15,9 @@
     "@mui/material": "^7.3.1",
     "@reduxjs/toolkit": "^2.8.2",
     "highlight.js": "^11.11.1",
-    "next": "^15.5.2",
-    "react": "19.1.0",
-    "react-dom": "19.1.0",
+    "next": "^15.5.9",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
     "react-highlight": "^0.15.0",
     "react-redux": "^9.2.0",
     "sass": "^1.90.0"
