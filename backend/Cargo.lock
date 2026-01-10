@@ -130,10 +130,10 @@ dependencies = [
  "actix-utils",
  "actix-web",
  "anyhow",
- "deadpool-redis 0.22.0",
+ "deadpool-redis",
  "derive_more",
  "rand 0.9.2",
- "redis 0.32.7",
+ "redis",
  "serde",
  "serde_json",
  "tracing",
@@ -1288,22 +1288,12 @@ dependencies = [
 
 [[package]]
 name = "deadpool-redis"
-version = "0.16.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1ed4f481f6a4770b95e09b91e183ee5ed6e1d4a34c0b09814012b3ee5e585f70"
-dependencies = [
- "deadpool",
- "redis 0.26.1",
-]
-
-[[package]]
-name = "deadpool-redis"
 version = "0.22.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c0965b977f1244bc3783bb27cd79cfcff335a8341da18f79232d00504b18eb1a"
 dependencies = [
  "deadpool",
- "redis 0.32.7",
+ "redis",
 ]
 
 [[package]]
@@ -3220,7 +3210,7 @@ dependencies = [
  "actix-web-httpauth",
  "anyhow",
  "base64 0.22.1",
- "deadpool-redis 0.16.0",
+ "deadpool-redis",
  "dotenvy",
  "entity",
  "futures-util",
@@ -3374,27 +3364,6 @@ dependencies = [
 
 [[package]]
 name = "redis"
-version = "0.26.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e902a69d09078829137b4a5d9d082e0490393537badd7c91a3d69d14639e115f"
-dependencies = [
- "arc-swap",
- "async-trait",
- "bytes",
- "combine",
- "futures-util",
- "itoa",
- "num-bigint",
- "percent-encoding",
- "pin-project-lite",
- "ryu",
- "tokio",
- "tokio-util",
- "url",
-]
-
-[[package]]
-name = "redis"
 version = "0.32.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "014cc767fefab6a3e798ca45112bccad9c6e0e218fbd49720042716c73cfef44"
@@ -3507,6 +3476,7 @@ dependencies = [
  "rustls-platform-verifier",
  "serde",
  "serde_json",
+ "serde_urlencoded",
  "sync_wrapper",
  "tokio",
  "tokio-rustls",

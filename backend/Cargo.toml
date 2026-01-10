@@ -14,13 +14,13 @@ actix-web = "4.11.0"
 actix-web-httpauth = "0.8.2"
 base64 = "0.22.1"
 # this silently has to match actix-session
-deadpool-redis = "0.16.0"
+deadpool-redis = "0.22.0"
 dotenvy = "0.15.7"
 entity = { path = "entity" }
 futures-util = "0.3.31"
 jsonwebtoken = { version = "10", features = ["rust_crypto"] }
 migration = { path = "migration" }
-reqwest = { version = "0.13.1", features = ["json"] }
+reqwest = { version = "0.13.1", features = ["json", "query"] }
 sea-orm = { version = "1.1.0", features = ["sqlx-postgres", "runtime-tokio", "macros", "with-uuid", "with-chrono"] }
 serde = { version = "1.0", features = ["derive"] }
 sha2 = "0.10.9"
