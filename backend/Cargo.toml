@@ -5,29 +5,29 @@ members = [".", "entity", "migration"]
 name = "pushflow-server"
 version = "0.1.0"
 edition = "2024"
+rust-version = "1.92.0"
 
 [dependencies]
 anyhow = "1.0.98"
+actix-session = { version = "0.11.0", features = ["redis-session", "redis-pool"] }
 actix-web = "4.11.0"
-tokio = { version = "1", features = ["full"] }
-jsonwebtoken = "9"
-serde = {version = "1.0", features = ["derive"] }
-reqwest = { version = "0.12.22", features = ["json"] }
-uuid = { version = "1.17.0", features = ["v4", "v7", "serde"] }
-dotenv = "0.15.0"
-sea-orm = { version = "1.1.0", features = ["sqlx-postgres", "runtime-tokio", "macros", "with-uuid", "with-chrono"] }
-entity = { path = "entity" }
-migration = { path = "migration" }
-actix-session = { version = "0.10.1", features = ["redis-session", "redis-pool"] }
+actix-web-httpauth = "0.8.2"
+base64 = "0.22.1"
 # this silently has to match actix-session
 deadpool-redis = "0.16.0"
+dotenvy = "0.15.7"
+entity = { path = "entity" }
 futures-util = "0.3.31"
-vapid = "0.6.0"
-actix-web-httpauth = "0.8.2"
-serde_json = "1.0.142"
-web-push = "0.11.0"
+jsonwebtoken = { version = "10", features = ["rust_crypto"] }
+migration = { path = "migration" }
+reqwest = { version = "0.13.1", features = ["json"] }
+sea-orm = { version = "1.1.0", features = ["sqlx-postgres", "runtime-tokio", "macros", "with-uuid", "with-chrono"] }
+serde = { version = "1.0", features = ["derive"] }
 sha2 = "0.10.9"
-base64 = "0.22.1"
+tokio = { version = "1", features = ["full"] }
+vapid = "0.6.0"
+web-push = "0.11.0"
+uuid = { version = "1.17.0", features = ["v4", "v7", "serde"] }
 
 [profile.release]
 lto = "fat"
