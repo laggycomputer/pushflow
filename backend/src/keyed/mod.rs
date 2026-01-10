@@ -11,9 +11,7 @@ use entity::sea_orm_active_enums::KeyScope;
 use entity::{api_key_scopes, api_keys, group_subscribers, groups, services, subscribers};
 use migration::sea_query;
 use sea_orm::sea_query::OnConflict;
-use sea_orm::{
-    ActiveModelTrait, ActiveValue, IntoActiveModel, PaginatorTrait,
-};
+use sea_orm::{ActiveModelTrait, ActiveValue, IntoActiveModel, PaginatorTrait};
 use sea_orm::{ColumnTrait, TransactionTrait};
 use sea_orm::{EntityTrait, QueryFilter};
 use serde::{Deserialize, Serialize};
